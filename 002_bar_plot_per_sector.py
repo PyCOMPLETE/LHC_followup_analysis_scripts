@@ -6,19 +6,31 @@ import LHCMeasurementTools.SetOfHomogeneousVariables as shv
 import LHCMeasurementTools.LHC_Heatloads as hl
 import LHCMeasurementTools.mystyle as ms
 
+from data_folders import data_folder_list
+
 import GasFlowHLCalculator.qbs_fill as qf
 
 import argparse
 import pickle
 import numpy as np
 import pylab as plt
-import time
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-o', help='Save plots on disk', action='store_true')
-args = parser.parse_args()
+parser.add_argument('-o', help='Save plots on disk.', action='store_true')
+parser.add_argument('--fromcsv', help='Load heatloads from csvs. By default, use recalculated.', action='store_true')
+parser.add_argument('--t', help='Time at which you plot the heat loads in hours.', type=float)
+parser.add_argument('--min-hl-scale', help='Minimum of plot.', type=float)
+parser.add_argument('--max-hl-scale', help='Maximum of plot.', type=float)
+parser.add_argument('--t-offset', help='Time within the fill which sets heat loads to 0 in hours.', type=float)
+parser.add_argument('--no-plot-model', help='Plot imp. SR contribution to heat loads.', action='store_true')
+parser.add_argument('--tag', help='Tag of plot windows.', default='')
+parser.add_argument('-v', help='Verbose.', action='store_true')
+parser.add_argument('--legend', help='Plot a legend for Imp/SR', action='store_true')
 
-from_csv = False
+parser.add_argument('--filln',type=int, default=None)
+
+args = parser.parse_args()
+from_csv = args.fromcsv
 
 filln = 5029
 t1 = 0.2#2.65
@@ -99,16 +111,29 @@ tagfname = 'high_energy'
 #~ plot_model = True
 #~ tagfname = '25ns2244b_high_energy'
 
+if args.filln:
+    filln = args.filln
 
-data_folder_list = [
-'/afs/cern.ch/project/spsecloud/LHC_2016_25ns/LHC_2016_25ns_beforeTS1/', 
-'/afs/cern.ch/project/spsecloud/LHC_2015_PhysicsAfterTS2/', 
-'/afs/cern.ch/project/spsecloud/LHC_2015_IntRamp25ns/']
+if args.t:
+    t1 = args.t
 
+if args.min_hl_scale:
+    min_hl_scale = args.min_hl_scale
+
+if args.max_hl_scale:
+    max_hl_scale = args.max_hl_scale
+
+if args.t_offset:
+    t_offset = args.t_offset
+
+if args.tag:
+    tagfname = args.tag
+
+plot_model = not args.no_plot_model
 
 if from_csv:
-    fill_file = 'hl_all_cells_fill_%d.csv'%filln
-    hid = tm.parse_timber_file(fill_file, verbose=True)
+    fill_file = 'fill_heatload_data_csvs/hl_all_cells_fill_%d.csv'%filln
+    hid = tm.parse_timber_file(fill_file, verbose=args.v)
 else:
     hid = qf.get_fill_dict(filln)
 
@@ -150,11 +175,11 @@ if plot_model:
     fill_dict = {}
     if os.path.isdir(data_folder_fill+'/fill_basic_data_csvs'):
         # 2016 structure
-        fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_basic_data_csvs/basic_data_fill_%d.csv'%filln, verbose=True))
-        fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_bunchbybunch_data_csvs/bunchbybunch_data_fill_%d.csv'%filln, verbose=True))
+        fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_basic_data_csvs/basic_data_fill_%d.csv'%filln, verbose=args.v))
+        fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_bunchbybunch_data_csvs/bunchbybunch_data_fill_%d.csv'%filln, verbose=args.v))
     else:
         # 2015 structure
-        fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_csvs/fill_%d.csv'%filln, verbose=True))
+        fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_csvs/fill_%d.csv'%filln, verbose=args.v))
 
     fbct_bx = {}
     bct_bx = {}
@@ -198,7 +223,11 @@ for i, s in enumerate(sectors[:]):
     for cell in hid.keys():
         if R_part not in cell and L_part not in cell:
             continue
-        ind1 = np.argmin(np.abs((np.array(hid[cell].t_stamps) - t_ref)/3600 - t1))
+        try:
+            ind1 = np.argmin(np.abs((np.array(hid[cell].t_stamps) - t_ref)/3600 - t1))
+        except ValueError as e:
+            print('Got Error %s, skipping cell %s' % (e, cell))
+            continue
         cellname = cell.split('_')[1]+'_'+cell.split('.POSST')[0][-1]
         if int(cellname[:2])<11: continue # skip LSS and DS
 
@@ -248,8 +277,16 @@ for i, s in enumerate(sectors[:]):
     ax1_sect = fig_sect.add_subplot(111)
 
     if plot_model:
-        ax1_sect.axhspan(ymin=0, ymax=hl_imped_t1, color='grey', alpha=0.5)
-        ax1_sect.axhspan(ymin=hl_imped_t1, ymax=hl_imped_t1+hl_sr_t1, color='green', alpha=0.5)
+        if args.legend:
+            label1, label2 = 'Imp', 'SR'
+        else:
+            label1, label2 = None, None
+        ax1_sect.axhspan(ymin=0, ymax=hl_imped_t1, color='grey', alpha=0.5, label=label1)
+        ax1_sect.axhspan(ymin=hl_imped_t1, ymax=hl_imped_t1+hl_sr_t1, color='green', alpha=0.5, label=label2)
+        if args.legend:
+            ax1_sect.legend(bbox_to_anchor=(1,1), loc='upper left')
+
+
 
 
     ind = np.arange(len(cells))
@@ -274,8 +311,8 @@ for i, s in enumerate(sectors[:]):
                         t1, tagfname, offset_info, s, len(cells), {False:'recalc. values', True:'DB values'}[from_csv]))
     plt.subplots_adjust(top=.83, left=.05)
     plt.grid('on')
-    
+
     if args.o:
-        plt.savefig('cellbycell_fill%d_t%.2fh_%s_sector%d.png'%(filln, t1, tagfname, s), dpi=200)
+        plt.savefig('cell_by_cell_plots/cellbycell_fill%d_t%.2fh_%s_sector%d.png'%(filln, t1, tagfname, s), dpi=200)
 
 plt.show()
