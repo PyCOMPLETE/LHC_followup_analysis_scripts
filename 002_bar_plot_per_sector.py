@@ -45,7 +45,7 @@ min_hl_scale = -10
 max_hl_scale = 80
 t_offset = None
 plot_model = True
-tagfname = 'high_energy'
+tagfname = ''
 
 #~ filln = 4511
 #~ t1 = 6.5
@@ -209,7 +209,15 @@ show_labels = True
 
 sectors = hl.sector_list()
 
+def swap_even_odd(vect):
+    temp_list = []
+    for ii in xrange(len(vect)//2):
+        temp_list.append(vect[2*ii+1])
+        temp_list.append(vect[2*ii])
+    return np.array(temp_list)
 
+	
+        
 
 for i, s in enumerate(sectors[:]):
 
@@ -221,6 +229,8 @@ for i, s in enumerate(sectors[:]):
     val1 = []
     cells = []
     for cell in hid.keys():
+        if '_D2' in cell or '_D3' in cell or '_D4' in cell or '_Q1' in cell:
+            continue
         if R_part not in cell and L_part not in cell:
             continue
         try:
@@ -260,13 +270,17 @@ for i, s in enumerate(sectors[:]):
     val1_lip = val1[msk_l]
     val1_rip = val1[~msk_l]
 
-    ind_sort = np.argsort(cells_lip)[::-1]
+    ind_sort = (np.argsort(cells_lip))[::-1]
     cells_lip = cells_lip[ind_sort]
     val1_lip = val1_lip[ind_sort]
-    ind_sort = np.argsort(cells_rip)
+    ind_sort = swap_even_odd(np.argsort(cells_rip))
     cells_rip = cells_rip[ind_sort]
     val1_rip = val1_rip[ind_sort]
+    
+    # swap 3 and 7 to recover the right order
 
+
+    
     cells = np.append(cells_rip, cells_lip)
     val1 = np.append(val1_rip, val1_lip)
 
@@ -304,12 +318,12 @@ for i, s in enumerate(sectors[:]):
     ax1_sect.set_xlim(ind[0]-2*width, ind[-1]+4*width)
 
     if show_labels:
-        fig_sect.subplots_adjust(left=.03, right=.96, top=0.92, hspace=0.15, bottom=0.19)
+        fig_sect.subplots_adjust(left=.06, right=.96, top=0.83, hspace=0.15, bottom=0.19)
     else:
-        fig_sect.subplots_adjust(left=.03, right=.96, top=0.92, hspace=0.15, bottom=0.05)
+        fig_sect.subplots_adjust(left=.06, right=.96, top=0.83, hspace=0.15, bottom=0.05)
     fig_sect.suptitle('Fill. %d started on %s\n(t=%.2fh, %s%s)\nSector %d, %d cells, %s'%(filln, tref_string,
                         t1, tagfname, offset_info, s, len(cells), {False:'recalc. values', True:'DB values'}[from_csv]))
-    plt.subplots_adjust(top=.83, left=.05)
+    #plt.subplots_adjust(top=.83, left=.05)
     plt.grid('on')
 
     if args.o:

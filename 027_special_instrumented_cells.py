@@ -18,6 +18,8 @@ import HeatLoadCalculators.impedance_heatload as ihl
 import HeatLoadCalculators.synchrotron_radiation_heatload as srhl
 import HeatLoadCalculators.FillCalculator as fc
 
+from data_folders import data_folder_list
+
 import GasFlowHLCalculator.qbs_fill as qf
 from GasFlowHLCalculator.config_qbs import config_qbs
 import GasFlowHLCalculator.data_S45_details as dsd
@@ -54,7 +56,7 @@ details = args.details
 
 myfontsz = 12
 ms.mystyle_arial(fontsz=myfontsz, dist_tick_lab=8)
-re_dev = re.compile('^QRLAA_(\d\d[RL]\d)_QBS\d{3}_([QD]\d).POSST$')
+re_dev = re.compile('^QRLA[AB]_(\d\d[RL]\d)_QBS\d{3}_([QD]\d).POSST$')
 plt.close('all')
 
 # Definitions
@@ -63,20 +65,32 @@ if args.nobroken:
     cells = ['13L5', '13R4']
 else:
     cells = ['13L5', '33L5', '13R4']
+new_cell = '31L2'
+
+if filln > 5700:
+    cells.append(new_cell)
+
+cell_notation_recalc_logged = {
+    '33L5': '33L5',
+    '13R4': '13L5',
+    '13L5': '13R5',
+    new_cell: new_cell,
+}
 
 if args.simple_titles:
     cell_title_dict = {
             '13L5': '13L5',
             '33L5': '33L5',
             '13R4': '13R4',
+            '31L2': '31L2',
             }
 else:
     cell_title_dict = {
             '13L5': '13L5 / 12R4',
             '33L5': '33L5 / 32R4 (broken sensor)',
             '13R4': '13R4 / 13L5 (reversed gas flow)',
+            '31L2': '31L2 / 32L2 (new cell)',
             }
-new_cell = '31L2'
 cells_and_new = cells + [new_cell]
 affix_list = ['Q1', 'D2', 'D3', 'D4']
 beam_colors = {1: 'b', 2: 'r'}
@@ -95,13 +109,18 @@ variable_list = []
 for key in keys:
     variable_list.extend(HL.variable_lists_heatloads[key])
 
+if new_cell not in cells:
+    variable_list = filter(lambda x: not(new_cell in x), variable_list)
+
+
 # Dictionary for variables
 hl_dict_logged = {}
 for cell in cells:
     hl_dict_logged[cell] = {}
     cell_vars = []
     for var in variable_list:
-        if cell in var:
+        logged_cell = cell_notation_recalc_logged[cell]
+        if logged_cell in var:
             for affix in affix_list:
                 if affix in var:
                     hl_dict_logged[cell][affix] = var
@@ -109,23 +128,33 @@ for cell in cells:
             else:
                 hl_dict_logged[cell]['Cell'] = var
 
-if filln < 4857:
-    with open('/afs/cern.ch/project/spsecloud/LHC_2015_PhysicsAfterTS2/fills_and_bmodes.pkl') as fid:
-        dict_fill_bmodes = pickle.load(fid)
-else:
-    with open('fills_and_bmodes.pkl', 'rb') as fid:
-        dict_fill_bmodes = pickle.load(fid)
+# merge pickles and add info on location
+dict_fill_bmodes={}
+for df in data_folder_list:
+    with open(df+'/fills_and_bmodes.pkl', 'rb') as fid:
+        this_dict_fill_bmodes = pickle.load(fid)
+        for kk in this_dict_fill_bmodes:
+            this_dict_fill_bmodes[kk]['data_folder'] = df
+        dict_fill_bmodes.update(this_dict_fill_bmodes)
 
 if avg_time_hrs == -1.:
-    avg_time_hrs = (dict_fill_bmodes[filln]['t_start_STABLE'] - dict_fill_bmodes[filln]['t_startfill'])/3600.
+    if dict_fill_bmodes[filln]['t_start_STABLE'] != -1:
+        avg_time_hrs = (dict_fill_bmodes[filln]['t_start_STABLE'] - dict_fill_bmodes[filln]['t_startfill'])/3600.
+    else:
+        print('Warning: Avg time hrs = 0.5')
+        avg_time_hrs = 0.5
+
+
+# get location of current data
+data_folder_fill = dict_fill_bmodes[filln]['data_folder']
 
 fill_dict = {}
 if filln < 4857:
     fill_dict.update(tm.parse_timber_file('/afs/cern.ch/project/spsecloud/LHC_2015_PhysicsAfterTS2/fill_csvs/fill_%d.csv' % filln, verbose=False))
     fill_dict.update(tm.parse_timber_file('/afs/cern.ch/project/spsecloud/LHC_2015_PhysicsAfterTS2/heatloads_fill_h5s/heatloads_all_fill_%i.h5' % filln, verbose=False))
 else:
-    fill_dict.update(tm.parse_timber_file('./fill_basic_data_csvs/basic_data_fill_%d.csv' % filln, verbose=False))
-    fill_dict.update(tm.parse_timber_file('./fill_heatload_data_csvs/heatloads_fill_%d.csv' % filln, verbose=False))
+    fill_dict.update(tm.parse_timber_file(data_folder_fill + '/fill_basic_data_csvs/basic_data_fill_%d.csv' % filln, verbose=False))
+    fill_dict.update(tm.parse_timber_file(data_folder_fill + '/fill_heatload_data_csvs/heatloads_fill_%d.csv' % filln, verbose=False))
 
 energy = Energy.energy(fill_dict, beam=1)
 energy.t_stamps = (energy.t_stamps - energy.t_stamps[0])/3600.
@@ -182,6 +211,7 @@ for cell_ctr, cell in enumerate(cells):
 #    if filln == 5277 and cell == '13L5':
 #        sp.set_ylim(-150, y_max)
     sp2 = sp.twinx()
+    sp2.set_ylim(0,7)
     sp2.set_ylabel('Energy [TeV]')
     sp2.plot(energy.t_stamps, energy.energy/1e3, c='black', lw=2., label='Energy')
 
@@ -225,7 +255,7 @@ sp.grid(True)
 sp.set_xlabel('Time [h]')
 sp.set_ylabel('Heat load [W]')
 sp.hist(arc_hist_total, bins=bins, alpha=0.5, color='blue')
-colors=['red', 'green', 'orange', 'black']
+colors=['red', 'green', 'orange', 'black', 'blue']
 for cell_ctr, cell in enumerate(cells_and_new):
     mean = np.mean(qbs_ob.data[atd_mask_mean,cell_index_dict[cell]])
     sp.axvline(mean, label=cell, color=colors[cell_ctr], lw=2)
@@ -291,7 +321,7 @@ sp_quad = plt.subplot(2,2,3)
 dip_list = []
 quad_list = []
 
-ls_list = ['-', '--', '-.']
+ls_list = ['-', '--', '-.', ':']
 
 for var in variable_list:
     for affix in affix_list:
@@ -416,6 +446,7 @@ if details:
             '13L5': '12R4',
             '33L5': '32R4',
             '13R4': '13L5',
+            '31L2': '32L2',
             }
 
     re_var = re.compile('^\w{4}_\w?(\d\d[RL]\d_TT\d{3})\.POSST$')
@@ -468,6 +499,7 @@ if details:
             sp.set_xlabel('Time [h]')
             sp.set_ylabel('Heat load [W]')
             sp2 = sp.twinx()
+            sp2.set_ylim(0,7)
             sp2.set_ylabel('Energy [TeV]')
             sp2.plot(energy.t_stamps, energy.energy/1e3, c='black', lw=2., label='Energy')
 

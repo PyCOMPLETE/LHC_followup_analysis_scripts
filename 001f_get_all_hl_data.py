@@ -15,10 +15,9 @@ max_fill_hrs = 35
 blacklist = []
 blacklist.append(4948) # 116 hour long fill, exceeds memory
 blacklist.append(5488) # 40 hour long fill, also exceeds memory
-
 parser = argparse.ArgumentParser()
 parser.add_argument('-r', help='reversed', action='store_true')
-parser.add_argument('year', choices=[2015, 2016, 2017], type=int)
+parser.add_argument('year', choices=[2012, 2015, 2016, 2017], type=int)
 
 args = parser.parse_args()
 year = args.year
@@ -34,10 +33,12 @@ temp_filepaths = ['./tmp/' + f for f in file_names]
 temp_files = [t + '_%i.csv' for t in temp_filepaths]
 data_file_funcs = [h5_storage.get_data_file, h5_storage.get_special_data_file]
 
-if year == 2015:
+if year == 2012:
+    fills_pkl_name = '/afs/cern.ch/work/l/lhcscrub/LHC_2012_25ns_period/fills_and_bmodes.pkl'
+elif year == 2015:
     fills_pkl_name = '/afs/cern.ch/project/spsecloud/LHC_2015_PhysicsAfterTS2/fills_and_bmodes.pkl'
 elif year == 2016:
-    fills_pkl_name = '/afs/cern.ch/project/spsecloud/LHC_2016_25ns/LHC_2016_25ns_beforeTS1'
+    fills_pkl_name = '/afs/cern.ch/project/spsecloud/LHC_2016_25ns/LHC_2016_25ns_beforeTS1/fills_and_bmodes.pkl'
 elif year == 2017:
     fills_pkl_name = '/afs/cern.ch/work/l/lhcscrub/LHC_2017_operation/fills_and_bmodes.pkl'
 else:
@@ -57,6 +58,8 @@ for variable_file, h5_dir, file_name, temp_filepath, temp_file, data_file_func i
             pass
         elif filln in blacklist:
             print('Fill %i is blacklisted' % filln)
+        elif not dict_fill_bmodes[filln]['flag_complete']:
+            print('Fill %i is not completed' % filln)
         else:
             t_start_fill = dict_fill_bmodes[filln]['t_startfill']
             t_end_fill   = dict_fill_bmodes[filln]['t_endfill']

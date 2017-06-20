@@ -71,6 +71,13 @@ show_labels = True
 
 sectors = hl.sector_list()
 
+def swap_even_odd(vect):
+    temp_list = []
+    for ii in xrange(len(vect)//2):
+        temp_list.append(vect[2*ii+1])
+        temp_list.append(vect[2*ii])
+    return np.array(temp_list)
+
 for i, s in enumerate(sectors):
 
     sect_str = str(s)
@@ -123,7 +130,7 @@ for i, s in enumerate(sectors):
     ind_sort = np.argsort(cells_lip)[::-1]
     cells_lip = cells_lip[ind_sort]
     val1_lip = val1_lip[ind_sort]
-    ind_sort = np.argsort(cells_rip)
+    ind_sort = swap_even_odd(np.argsort(cells_rip))
     cells_rip = cells_rip[ind_sort]
     val1_rip = val1_rip[ind_sort]
 
