@@ -26,26 +26,32 @@ parser.add_argument('--no-plot-model', help='Plot imp. SR contribution to heat l
 parser.add_argument('--tag', help='Tag of plot windows.', default='')
 parser.add_argument('-v', help='Verbose.', action='store_true')
 parser.add_argument('--legend', help='Plot a legend for Imp/SR', action='store_true')
+parser.add_argument('--normtointensity', help='Normalize to beam intensity', action='store_true')
+
 
 parser.add_argument('--filln',type=int, default=None)
 
 args = parser.parse_args()
-from_csv = args.fromcsv
 
-filln = 5029
-t1 = 0.2#2.65
-min_hl_scale = -5
-max_hl_scale = 250
 t_offset = None
-plot_model = True
-
-filln = 5386
-t1 = 2.
-min_hl_scale = -10
-max_hl_scale = 80
-t_offset = None
-plot_model = True
+min_hl_scale = None
+max_hl_scale = None
 tagfname = ''
+
+#~ filln = 5029
+#~ t1 = 0.2#2.65
+#~ min_hl_scale = -5
+#~ max_hl_scale = 250
+#~ t_offset = None
+#~ plot_model = True
+
+#~ filln = 5386
+#~ t1 = 2.
+#~ min_hl_scale = -10
+#~ max_hl_scale = 80
+#~ t_offset = None
+#~ plot_model = True
+#~ tagfname = ''
 
 #~ filln = 4511
 #~ t1 = 6.5
@@ -131,11 +137,14 @@ if args.tag:
 
 plot_model = not args.no_plot_model
 
+from_csv = args.fromcsv
 if from_csv:
     fill_file = 'fill_heatload_data_csvs/hl_all_cells_fill_%d.csv'%filln
     hid = tm.parse_timber_file(fill_file, verbose=args.v)
 else:
     hid = qf.get_fill_dict(filln)
+
+normtointen = args.normtointensity
 
 
 varlist = hl.arcs_varnames_static
@@ -161,8 +170,8 @@ t_ref=t_fill_st
 tref_string=time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime(t_ref))
 
 
-# to plot impedance and synchrotron radiation
-if plot_model:
+# to plot impedance and synchrotron radiation and/or normalize to intensity
+if plot_model or normtointen:
 
     from LHCMeasurementTools.LHC_FBCT import FBCT
     from LHCMeasurementTools.LHC_BCT import BCT
@@ -198,7 +207,12 @@ if plot_model:
     hl_imped_t1 = hl.magnet_length['AVG_ARC'][0]*np.interp(t1, (hl_imped_fill.t_stamps-t_ref)/3600,  hl_imped_fill.heat_load_calculated_total)
     hl_sr_t1 = hl.magnet_length['AVG_ARC'][0]*np.interp(t1, (hl_imped_fill.t_stamps-t_ref)/3600,  hl_sr_fill.heat_load_calculated_total)
 
-
+    if normtointen:
+        bct1_int = np.interp(t1, (bct_bx[1].t_stamps-t_ref)/3600, bct_bx[1].values)
+        bct2_int = np.interp(t1, (bct_bx[2].t_stamps-t_ref)/3600, bct_bx[2].values)
+        totintnorm = bct1_int+bct2_int
+    else:
+        totintnorm = 1.
 
 
 
@@ -216,9 +230,9 @@ def swap_even_odd(vect):
         temp_list.append(vect[2*ii])
     return np.array(temp_list)
 
-	
-        
 
+
+spshare = None
 for i, s in enumerate(sectors[:]):
 
     sect_str = str(s)
@@ -276,11 +290,11 @@ for i, s in enumerate(sectors[:]):
     ind_sort = swap_even_odd(np.argsort(cells_rip))
     cells_rip = cells_rip[ind_sort]
     val1_rip = val1_rip[ind_sort]
-    
+
     # swap 3 and 7 to recover the right order
 
 
-    
+
     cells = np.append(cells_rip, cells_lip)
     val1 = np.append(val1_rip, val1_lip)
 
@@ -288,26 +302,30 @@ for i, s in enumerate(sectors[:]):
     #single sector plot
     fig_sect = plt.figure(1000+i, figsize=(12,4.5), tight_layout=False)
     fig_sect.patch.set_facecolor('w')
-    ax1_sect = fig_sect.add_subplot(111)
+    ax1_sect = fig_sect.add_subplot(111, sharex=spshare, sharey=spshare)
+    spshare = ax1_sect
 
     if plot_model:
         if args.legend:
             label1, label2 = 'Imp', 'SR'
         else:
             label1, label2 = None, None
-        ax1_sect.axhspan(ymin=0, ymax=hl_imped_t1, color='grey', alpha=0.5, label=label1)
-        ax1_sect.axhspan(ymin=hl_imped_t1, ymax=hl_imped_t1+hl_sr_t1, color='green', alpha=0.5, label=label2)
+        ax1_sect.axhspan(ymin=0, ymax=hl_imped_t1/totintnorm, color='grey', alpha=0.5, label=label1)
+        ax1_sect.axhspan(ymin=hl_imped_t1/totintnorm, ymax=(hl_imped_t1+hl_sr_t1)/totintnorm, color='green', alpha=0.5, label=label2)
         if args.legend:
             ax1_sect.legend(bbox_to_anchor=(1,1), loc='upper left')
 
 
-
-
     ind = np.arange(len(cells))
+    if normtointen:
+        val1/=totintnorm
     bar = ax1_sect.bar(ind, val1, width, color='b', label='%.1f h after start of fill'%t1, alpha=0.5)
 
 
-    ax1_sect.set_ylabel('Heatload [W/hc]')
+    if normtointen:
+        ax1_sect.set_ylabel('Norm. heat load [W/hc/p+]')
+    else:
+        ax1_sect.set_ylabel('Heat load [W/hc]')
     ax1_sect.set_ylim(min_hl_scale, max_hl_scale)
     #ax1_sect.legend(loc='upper right')
     ax1_sect.set_xticks(ind+width)

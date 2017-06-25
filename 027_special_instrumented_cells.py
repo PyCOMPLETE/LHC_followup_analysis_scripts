@@ -30,6 +30,7 @@ avg_pm_hrs = 0.1
 fills_bmodes_name = './fills_and_bmodes.pkl'
 separate_fig_for_hist = True
 
+
 parser = argparse.ArgumentParser()
 parser.add_argument('filln', type=int)
 parser.add_argument('-a', help='Point in time where to calculate the heat load', type=float, default=-1.)
@@ -44,6 +45,8 @@ parser.add_argument('--nobroken', help='Do not plot the cell with broken sensor'
 parser.add_argument('--separate', help='Show heat load for BS separately', action='store_true')
 parser.add_argument('--noshow', help='Do not call plt.show', action='store_true')
 parser.add_argument('--contributions', help='Show contributions', action='store_true')
+parser.add_argument('--no-use-dP', help='Load cell data without dP', action='store_true')
+parser.add_argument('--force-recalc', help='Recalc special qbs instead of loading from h5.', action='store_true')
 args = parser.parse_args()
 
 filln = args.filln
@@ -53,6 +56,8 @@ binwidth = args.w
 logged = not args.nolog
 hist = args.hist
 details = args.details
+use_dP = not args.no_use_dP
+use_new_cell = filln > 5700
 
 myfontsz = 12
 ms.mystyle_arial(fontsz=myfontsz, dist_tick_lab=8)
@@ -60,14 +65,13 @@ re_dev = re.compile('^QRLA[AB]_(\d\d[RL]\d)_QBS\d{3}_([QD]\d).POSST$')
 plt.close('all')
 
 # Definitions
-keys = ['special_HC_Q1', 'special_HC_D2', 'special_HC_D3', 'special_HC_D4', 'special_total']
 if args.nobroken:
     cells = ['13L5', '13R4']
 else:
     cells = ['13L5', '33L5', '13R4']
 new_cell = '31L2'
 
-if filln > 5700:
+if use_new_cell:
     cells.append(new_cell)
 
 cell_notation_recalc_logged = {
@@ -97,36 +101,89 @@ beam_colors = {1: 'b', 2: 'r'}
 
 # Which cells are the special ones in the qbs data?
 cell_index_dict = {}
-for cell_ctr, cell in enumerate(dsd.cell_list + [new_cell]):
-    if cell == new_cell:
-        eh = 'LBARB_31L2_EH843.POSST'
-    else:
-        eh = dsd.EH84x_list[cell_ctr]
+for cell_ctr, cell in enumerate(dsd.cell_list):
+    eh = dsd.EH84x_list[cell_ctr]
     index = config_qbs.EH84x_list.index(eh)
     cell_index_dict[cell] = index
 
-variable_list = []
-for key in keys:
-    variable_list.extend(HL.variable_lists_heatloads[key])
+keys = ['special_HC_Q1', 'special_HC_D2', 'special_HC_D3', 'special_HC_D4', 'special_total']
+variable_list = HL.variable_lists_heatloads['special_total'][:]
+for list_ in dsd.QBS_12R4, dsd.QBS_13L5, dsd.QBS_32R4:
+    variable_list.extend(list_)
 
 if new_cell not in cells:
     variable_list = filter(lambda x: not(new_cell in x), variable_list)
+else:
+    variable_list.extend(dsd.QBS_32L2)
 
 
 # Dictionary for variables
-hl_dict_logged = {}
-for cell in cells:
-    hl_dict_logged[cell] = {}
-    cell_vars = []
-    for var in variable_list:
-        logged_cell = cell_notation_recalc_logged[cell]
-        if logged_cell in var:
-            for affix in affix_list:
-                if affix in var:
-                    hl_dict_logged[cell][affix] = var
-                    break
-            else:
-                hl_dict_logged[cell]['Cell'] = var
+#if not use_new_cell:
+if True:
+    hl_dict_logged = {
+        '13R4': {
+            # Swapped because reversed Gas flow
+            'Q1': 'QRLAA_13R4_QBS947_Q1.POSST',
+            'D2': 'QRLAA_13R4_QBS947_D4.POSST',
+            'D3': 'QRLAA_13R4_QBS947_D3.POSST',
+            'D4': 'QRLAA_13R4_QBS947_D2.POSST',
+            'Cell': 'QRLAA_13L5_QBS943.POSST', # Yes this is correct
+        },
+        '33L5': {
+            'Q1': 'QRLAA_33L5_QBS947_Q1.POSST',
+            'D2': 'QRLAA_33L5_QBS947_D2.POSST',
+            'D3': 'QRLAA_33L5_QBS947_D3.POSST',
+            'D4': 'QRLAA_33L5_QBS947_D4.POSST',
+            'Cell': 'QRLAA_33L5_QBS947.POSST',
+        },
+        '13L5': {
+            'Q1': 'QRLAA_13L5_QBS943_Q1.POSST',
+            'D2': 'QRLAA_13L5_QBS943_D2.POSST',
+            'D3': 'QRLAA_13L5_QBS943_D3.POSST',
+            'D4': 'QRLAA_13L5_QBS943_D4.POSST',
+            'Cell': 'QRLAA_13R4_QBS947.POSST', # Yes this is correct
+        },
+        '31L2': {
+            'Q1': 'QRLAB_31L2_QBS943_Q1.POSST',
+            'D2': 'QRLAB_31L2_QBS943_D2.POSST',
+            'D3': 'QRLAB_31L2_QBS943_D3.POSST',
+            'D4': 'QRLAB_31L2_QBS943_D4.POSST',
+            'Cell': 'QRLAB_31L2_QBS943.POSST',
+        },
+    }
+## This did not fix the 2016 -> 2017 change
+#else:
+#    hl_dict_logged = {
+#        '13R4': {
+#            # Swapped because reversed Gas flow
+#            'Q1': 'QRLAA_13L5_QBS943_Q1.POSST',
+#            'D2': 'QRLAA_13L5_QBS943_D2.POSST',
+#            'D3': 'QRLAA_13L5_QBS943_D3.POSST',
+#            'D4': 'QRLAA_13L5_QBS943_D4.POSST',
+#            'Cell': 'QRLAA_13L5_QBS943.POSST',
+#        },
+#        '33L5': {
+#            'Q1': 'QRLAA_33L5_QBS947_Q1.POSST',
+#            'D2': 'QRLAA_33L5_QBS947_D2.POSST',
+#            'D3': 'QRLAA_33L5_QBS947_D3.POSST',
+#            'D4': 'QRLAA_33L5_QBS947_D4.POSST',
+#            'Cell': 'QRLAA_33L5_QBS947.POSST',
+#        },
+#        '13L5': {
+#            'Q1': 'QRLAA_13R4_QBS947_Q1.POSST',
+#            'D2': 'QRLAA_13R4_QBS947_D2.POSST', # Yes this is correct
+#            'D3': 'QRLAA_13R4_QBS947_D3.POSST',
+#            'D4': 'QRLAA_13R4_QBS947_D4.POSST',
+#            'Cell': 'QRLAA_13R4_QBS947.POSST',
+#        },
+#        '31L2': {
+#            'Q1': 'QRLAB_31L2_QBS943_Q1.POSST',
+#            'D2': 'QRLAB_31L2_QBS943_D2.POSST',
+#            'D3': 'QRLAB_31L2_QBS943_D3.POSST',
+#            'D4': 'QRLAB_31L2_QBS943_D4.POSST',
+#            'Cell': 'QRLAB_31L2_QBS943.POSST',
+#        },
+#    }
 
 # merge pickles and add info on location
 dict_fill_bmodes={}
@@ -162,17 +219,17 @@ t_ref = dict_fill_bmodes[filln]['t_startfill']
 tref_string = time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime(t_ref))
 
 heatloads = SetOfHomogeneousNumericVariables(variable_list=variable_list, timber_variables=fill_dict).aligned_object(dt_seconds=60)
-# Swap 13L5 D2 and D4, as the correct gas flow is in reverse direction
-for ctr,var in enumerate(heatloads.variables):
-    if '13R4' in var:
-        if 'D2' in var:
-            ctr_2 = ctr
-            var_2 = var
-        elif 'D4' in var:
-            ctr_4 = ctr
-            var_4 = var
-heatloads.variables[ctr_2] = var_4
-heatloads.variables[ctr_4] = var_2
+## Swap 13L5 D2 and D4, as the correct gas flow is in reverse direction
+#for ctr,var in enumerate(heatloads.variables):
+#    if '13R4' in var:
+#        if 'D2' in var:
+#            ctr_2 = ctr
+#            var_2 = var
+#        elif 'D4' in var:
+#            ctr_4 = ctr
+#            var_4 = var
+#heatloads.variables[ctr_2] = var_4
+#heatloads.variables[ctr_4] = var_2
 
 y_min, y_max = -10, np.max(heatloads.data)+5
 timestamps = (heatloads.timestamps - heatloads.timestamps[0])/3600.
@@ -180,9 +237,9 @@ mask_mean = np.abs(timestamps - avg_time_hrs) < avg_pm_hrs
 
 
 # Recalculated objects
-special_hl = qf.special_qbs_fill(filln)
+special_hl = qf.special_qbs_fill(filln, force_recalc=args.force_recalc)
 special_tt = (special_hl['timestamps'] - special_hl['timestamps'][0]) / 3600.
-qbs_ob = qf.compute_qbs_fill(filln, use_dP=True)
+qbs_ob = qf.compute_qbs_fill(filln, use_dP=use_dP)
 qbs_tt = (qbs_ob.timestamps - qbs_ob.timestamps[0])/3600.
 atd_mask_mean = np.abs(qbs_tt - avg_time_hrs) < avg_pm_hrs
 
@@ -598,8 +655,7 @@ if args.contributions:
 
 
 if args.pdsave:
-    for fig in figs:
-        sf.pdijksta(fig)
+    sf.saveall_pdijksta()
 
 if not args.noshow:
     plt.show()

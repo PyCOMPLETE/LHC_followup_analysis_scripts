@@ -34,7 +34,9 @@ parser.add_argument('--noplotmodel', help='Do not plot the model heat load', act
 parser.add_argument('--savefig', help='Save figures in pdijksta dir', action='store_true')
 parser.add_argument('--beam-events', help='Show when is begin of squeeze etc.', action = 'store_true')
 parser.add_argument('--use-recalc', help='Recalculated heat loads from Gasflow.', action = 'store_true')
+parser.add_argument('--normtointensity', help='Normalize to beam intensity', action='store_true')
 parser.add_argument('-v', help='Verbose parsing of timber files.', action = 'store_true')
+
 #parser.add_argument('--time', metavar='TIME', type=str, nargs='*')
 
 args = parser.parse_args()
@@ -48,6 +50,9 @@ plot_model = not args.noplotmodel
 plot_t_arr = True
 use_recalculated = args.use_recalc
 group_names = args.varlists
+normtointen = args.normtointensity
+
+int_cut_norm = 1e13
 
 myfontsz = 14
 pl.close('all')
@@ -145,14 +150,14 @@ dict_hl_groups = HL.heat_loads_plot_sets
 
 
 for ii, group_name in enumerate(group_names):
-    fig_h = pl.figure(ii, figsize=(12, 10))
+    fig_h = pl.figure(ii, figsize=(8*1.4, 6*1.4))
     figs.append(fig_h)
     fig_h.patch.set_facecolor('w')
 
     sptotint = pl.subplot(3,1,1, sharex=sp1)
     sp1 = sptotint
-    if flag_bunch_length:
-        spavbl = pl.subplot(3,1,3, sharex=sp1)
+    #if flag_bunch_length:
+    spavbl = pl.subplot(3,1,3, sharex=sp1)
     sphlcell = pl.subplot(3,1,2, sharex=sp1)
     spenergy = sptotint.twinx()
 
@@ -181,12 +186,12 @@ for ii, group_name in enumerate(group_names):
         sptotint.grid('on')
         sptotint.set_ylim(0, None)
 
-        if flag_bunch_length:
+        if flag_bunch_length and not normtointen:
             spavbl.plot((blength_bx[beam_n].t_stamps-t_ref)/3600., blength_bx[beam_n].avblen/1e-9, '.-', color=colstr[beam_n])
             spavbl.set_ylabel('Bunch length [ns]')
             spavbl.set_ylim(0.8,1.8)
-            spavbl.grid('on')
-            spavbl.set_xlabel('Time [h]')
+        spavbl.grid('on')
+        spavbl.set_xlabel('Time [h]')
 
     ms.comb_legend(sptotint, spenergy, bbox_to_anchor=(1.1, 1),  loc='upper left', prop={'size':myfontsz})
 
@@ -233,6 +238,15 @@ for ii, group_name in enumerate(group_names):
 
         sphlcell.plot((heatloads.timber_variables[kk].t_stamps-t_ref)/3600, heatloads.timber_variables[kk].values-offset,
             '-', color=colorcurr, lw=2., label=label)#.split('_QBS')[0])
+            
+        if normtointen:
+            t_curr = heatloads.timber_variables[kk].t_stamps
+            hl_curr = heatloads.timber_variables[kk].values
+            bct1_int = np.interp(t_curr, bct_bx[1].t_stamps, bct_bx[1].values)
+            bct2_int = np.interp(t_curr, bct_bx[2].t_stamps, bct_bx[2].values)
+            hl_norm = hl_curr/(bct1_int+bct2_int)
+            hl_norm[(bct1_int+bct2_int)<int_cut_norm] = 0.
+            spavbl.plot((t_curr-t_ref)/3600, hl_norm,'-', color=colorcurr, lw=2.)
 
     if plot_model and (group_name == 'Arcs' or group_name == 'AVG_ARC'):
         hli_calculator  = ihl.HeatLoadCalculatorImpedanceLHCArc()
@@ -261,9 +275,12 @@ for ii, group_name in enumerate(group_names):
     #~ sphlcell.set_xlabel('Time [h]')
     sphlcell.legend(prop={'size':myfontsz}, bbox_to_anchor=(1.1, 1.0),  loc='upper left')
     sphlcell.grid('on')
+    
+    if normtointen:
+         spavbl.set_ylabel('Normalized heat load [W/p+]')
 
-    pl.subplots_adjust(right=0.65, wspace=0.35)
-    fig_h.set_size_inches(15., 8.)
+    pl.subplots_adjust(right=0.65, wspace=0.35, hspace=.26)
+    #~ fig_h.set_size_inches(15., 8.)
 
 if args.savefig:
     sf.saveall_pdijksta()

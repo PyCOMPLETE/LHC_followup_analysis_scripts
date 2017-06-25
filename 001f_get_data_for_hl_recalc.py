@@ -1,3 +1,4 @@
+from __future__ import division
 import os
 import cPickle as pickle
 import argparse
@@ -15,9 +16,10 @@ max_fill_hrs = 35
 blacklist = []
 blacklist.append(4948) # 116 hour long fill, exceeds memory
 blacklist.append(5488) # 40 hour long fill, also exceeds memory
+
 parser = argparse.ArgumentParser()
 parser.add_argument('-r', help='reversed', action='store_true')
-parser.add_argument('year', choices=[2012, 2015, 2016, 2017], type=int)
+parser.add_argument('--year', choices=[2012, 2015, 2016, 2017], type=int, default=2017)
 
 args = parser.parse_args()
 year = args.year
