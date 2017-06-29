@@ -35,6 +35,12 @@ parser.add_argument('--savefig', help='Save figures in pdijksta dir', action='st
 parser.add_argument('--beam-events', help='Show when is begin of squeeze etc.', action = 'store_true')
 parser.add_argument('--use-recalc', help='Recalculated heat loads from Gasflow.', action = 'store_true')
 parser.add_argument('--normtointensity', help='Normalize to beam intensity', action='store_true')
+parser.add_argument('--add-csv-to-fill-dict', nargs='+', default=[])
+parser.add_argument('--full-varname-in-legend', help='Do not shorten varnames.', action='store_true')
+parser.add_argument('--colormap', help='chose between hsv and rainbow', default='hsv')
+
+parser.add_argument('--custom_vars', help='Custom list of variables to plot', nargs='+', default=[])
+
 parser.add_argument('-v', help='Verbose parsing of timber files.', action = 'store_true')
 
 #parser.add_argument('--time', metavar='TIME', type=str, nargs='*')
@@ -51,6 +57,7 @@ plot_t_arr = True
 use_recalculated = args.use_recalc
 group_names = args.varlists
 normtointen = args.normtointensity
+added_csvs = args.add_csv_to_fill_dict
 
 int_cut_norm = 1e13
 
@@ -75,6 +82,14 @@ arc_correction_factor_list = HL.arc_average_correction_factors()
 colstr = {}
 colstr[1] = 'b'
 colstr[2] = 'r'
+
+dict_hl_groups = HL.heat_loads_plot_sets
+
+# handle custom list
+if len(args.custom_vars)>0:
+    group_names.append('Custom')
+    dict_hl_groups['Custom'] = args.custom_vars
+    
 
 
 # merge pickles and add info on location
@@ -114,6 +129,11 @@ else:
             if 'QBS' in kk and '.POSST'in kk:
                 fill_dict[kk] = 'Not recalculated'
         fill_dict.update(qf.get_fill_dict(filln))
+ 
+# Handle additional csvs 
+for csv in added_csvs:
+    fill_dict.update(tm.parse_timber_file(csv), verbose=True)
+
 
 dict_beam = fill_dict
 dict_fbct = fill_dict
@@ -146,7 +166,7 @@ N_figures = len(group_names)
 figs = []
 sp1 = None
 
-dict_hl_groups = HL.heat_loads_plot_sets
+
 
 
 for ii, group_name in enumerate(group_names):
@@ -222,19 +242,22 @@ for ii, group_name in enumerate(group_names):
     if flag_average:
         hl_ts_curr, hl_aver_curr  = heatloads.mean()
     for ii, kk in enumerate(heatloads.variable_list):
-        colorcurr = ms.colorprog(i_prog=ii, Nplots=len(heatloads.variable_list))
+        colorcurr = ms.colorprog(i_prog=ii, Nplots=len(heatloads.variable_list), cm=args.colormap)
         if t_zero is not None:
             offset = np.interp(t_ref+t_zero*3600, heatloads.timber_variables[kk].t_stamps, heatloads.timber_variables[kk].values)
         else:
             offset=0.
 
-        label = ''
-        for st in kk.split('.POSST')[0].split('_'):
-            if 'QRL' in st or 'QBS' in st or 'AVG' in st or 'ARC' in st:
-                pass
-            else:
-                label += st + ' '
-        label = label[:-1]
+        if args.full_varname_in_legend:
+            label = kk
+        else:
+            label = ''
+            for st in kk.split('.POSST')[0].split('_'):
+                if 'QRL' in st or 'QBS' in st or 'AVG' in st or 'ARC' in st:
+                    pass
+                else:
+                    label += st + ' '
+            label = label[:-1]
 
         sphlcell.plot((heatloads.timber_variables[kk].t_stamps-t_ref)/3600, heatloads.timber_variables[kk].values-offset,
             '-', color=colorcurr, lw=2., label=label)#.split('_QBS')[0])

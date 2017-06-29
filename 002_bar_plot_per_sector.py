@@ -302,7 +302,7 @@ for i, s in enumerate(sectors[:]):
     #single sector plot
     fig_sect = plt.figure(1000+i, figsize=(12,4.5), tight_layout=False)
     fig_sect.patch.set_facecolor('w')
-    ax1_sect = fig_sect.add_subplot(111, sharex=spshare, sharey=spshare)
+    ax1_sect = fig_sect.add_subplot(111, sharey=spshare)
     spshare = ax1_sect
 
     if plot_model:
