@@ -11,75 +11,89 @@ from data_folders import data_folder_list
 
 import GasFlowHLCalculator.qbs_fill as qf
 
+import cell_by_cell_plot_helpers as cch
+
 import argparse
 import pickle
 import numpy as np
 import pylab as plt
 
-parser = argparse.ArgumentParser()
-parser.add_argument('-o', help='Save plots on disk.', action='store_true')
-parser.add_argument('--fromcsv', help='Load heatloads from csvs. By default, use recalculated.', action='store_true')
-parser.add_argument('--t', help='Time at which you plot the heat loads in hours.', type=float)
-parser.add_argument('--min-hl-scale', help='Minimum of plot.', type=float)
-parser.add_argument('--max-hl-scale', help='Maximum of plot.', type=float)
-parser.add_argument('--t-offset', help='Time within the fill which sets heat loads to 0 in hours.', type=float)
-parser.add_argument('--no-plot-model', help='Plot imp. SR contribution to heat loads.', action='store_true')
-parser.add_argument('--tag', help='Tag of plot windows.', default='')
-parser.add_argument('-v', help='Verbose.', action='store_true')
-parser.add_argument('--legend', help='Plot a legend for Imp/SR', action='store_true')
-parser.add_argument('--normtointensity', help='Normalize to beam intensity', action='store_true')
 
 
-parser.add_argument('--filln',type=int, default=None)
-
-args = parser.parse_args()
-
+# defaults
 t_offset = None
 min_hl_scale = None
 max_hl_scale = None
 tagfname = ''
-
-
 #histogram parameters
 minhist = -5
 maxhist = 230
 nbinhist = 20
 
 
-if args.filln:
-    filln = args.filln
 
-if args.t:
-    t1 = args.t
 
+# parse arguments
+parser = argparse.ArgumentParser(epilog='Example: 002b_bar_plot_per_sector_multiple_fills.py --at filln:5108!t_h:2.5!t_offs_h:0.05 filln:5108!t_h:3.5!t_offs_h:0.05')
+parser.add_argument('-o', help='Save plots on disk.', action='store_true')
+parser.add_argument('--fromcsv', help='Load heatloads from csvs. By default, use recalculated.', action='store_true')
+
+parser.add_argument('--min-hl-scale', help='Minimum of plot.', type=float)
+parser.add_argument('--max-hl-scale', help='Maximum of plot.', type=float)
+parser.add_argument('--no-plot-model', help='Plot imp. SR contribution to heat loads.', action='store_true')
+parser.add_argument('--tag', help='Tag of plot windows.', default='')
+parser.add_argument('-v', help='Verbose.', action='store_true')
+parser.add_argument('--legend', help='Plot a legend for Imp/SR', action='store_true')
+parser.add_argument('--normtointensity', help='Normalize to beam intensity', action='store_true')
+
+parser.add_argument('--at', help="Snapshots in the form: filln:5108!t_h:2.5!t_offs_h:0.05 filln:5108!t_h:3.5!t_offs_h:0.05", nargs='+')
+
+
+#~ parser.add_argument('--t', help='Time at which you plot the heat loads in hours.', type=float)
+#~ parser.add_argument('--t-offset', help='Time within the fill which sets heat loads to 0 in hours.', type=float)
+#~ parser.add_argument('--filln',type=int, default=None)
+
+args = parser.parse_args()
+
+#~ if args.filln:
+    #~ filln = args.filln
+#~ if args.t:
+    #~ t_sample_h = args.t
 if args.min_hl_scale:
     min_hl_scale = args.min_hl_scale
-
 if args.max_hl_scale:
     max_hl_scale = args.max_hl_scale
-
-if args.t_offset:
-    t_offset = args.t_offset
-
+#~ if args.t_offset:
+    #~ t_offset = args.t_offset
 if args.tag:
     tagfname = args.tag
 
 plot_model = not args.no_plot_model
 
 from_csv = args.fromcsv
-if from_csv:
-    fill_file = 'fill_heatload_data_csvs/hl_all_cells_fill_%d.csv'%filln
-    hid = tm.parse_timber_file(fill_file, verbose=args.v)
-else:
-    hid = qf.get_fill_dict(filln)
-
 normtointen = args.normtointensity
 
 
-varlist = hl.arcs_varnames_static
-
-hid_set = shv.SetOfHomogeneousNumericVariables(varlist, hid)
-
+# beuild snaphosts dicts
+snapshots = []
+for strin in args.at:
+    dd = {}
+    for ss in strin.split('!'):
+        kk, value=ss.split(':')
+        if kk=='filln':
+            dd[kk] = int(value)
+        elif kk=='t_h' or kk=='t_offs_h':
+            dd[kk] = float(value)
+        else:
+            raise ValueError("Input not recognized\n"+strin)
+            
+    if 't_offs_h' not in dd.keys():
+        dd['t_offs_h'] = None
+        
+    snapshots.append(dd)
+    
+    
+    
 # merge pickles and add info on location
 dict_fill_bmodes={}
 for df in data_folder_list:
@@ -90,26 +104,29 @@ for df in data_folder_list:
         dict_fill_bmodes.update(this_dict_fill_bmodes)
 
 
-# get location of current data
-data_folder_fill = dict_fill_bmodes[filln]['data_folder']
 
-t_fill_st = dict_fill_bmodes[filln]['t_startfill']
-t_fill_end = dict_fill_bmodes[filln]['t_endfill']
-t_ref=t_fill_st
-tref_string=time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime(t_ref))
+N_snapshots = len(snapshots)
 
+for i_snapshot in xrange(N_snapshots):
 
-# to plot impedance and synchrotron radiation and/or normalize to intensity
-if plot_model or normtointen:
+    filln = snapshots[i_snapshot]['filln']
+    t_sample_h = snapshots[i_snapshot]['t_h']
+    t_offset_h = snapshots[i_snapshot]['t_offs_h']
+    
+    if from_csv:
+        fill_file = 'fill_heatload_data_csvs/hl_all_cells_fill_%d.csv'%filln
+        hid = tm.parse_timber_file(fill_file, verbose=args.v)
+    else:
+        hid = qf.get_fill_dict(filln)
 
-    from LHCMeasurementTools.LHC_FBCT import FBCT
-    from LHCMeasurementTools.LHC_BCT import BCT
-    from LHCMeasurementTools.LHC_BQM import blength
+    # get location of current data
+    data_folder_fill = dict_fill_bmodes[filln]['data_folder']
+    t_fill_st = dict_fill_bmodes[filln]['t_startfill']
+    t_fill_end = dict_fill_bmodes[filln]['t_endfill']
+    t_ref=t_fill_st
+    tref_string=time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime(t_ref))
 
-    import HeatLoadCalculators.impedance_heatload as ihl
-    import HeatLoadCalculators.synchrotron_radiation_heatload as srhl
-    import HeatLoadCalculators.FillCalculator as fc
-
+    # extract standard fill data
     fill_dict = {}
     if os.path.isdir(data_folder_fill+'/fill_basic_data_csvs'):
         # 2016 structure
@@ -118,118 +135,110 @@ if plot_model or normtointen:
     else:
         # 2015 structure
         fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_csvs/fill_%d.csv'%filln, verbose=args.v))
+        
+    #sample standard fill data at right moment
+    intensity_b1, intensity_b2, n_bunches_b1, n_bunches_b2, energy_GeV, hl_imped_sample, hl_sr_sample = cch.extract_and_compute_extra_fill_data(fill_dict, t_ref, t_sample_h, thresh_bint=3e10)
 
-    fbct_bx = {}
-    bct_bx = {}
-    blength_bx = {}
-    for beam_n in [1,2]:
-        fbct_bx[beam_n] = FBCT(fill_dict, beam = beam_n)
-        bct_bx[beam_n] = BCT(fill_dict, beam = beam_n)
-        blength_bx[beam_n] = blength(fill_dict, beam = beam_n)
+    # extract heat load data
+    dict_hl_cell_by_cell = cch.sample_and_sort_cell_by_cell(hid, t_ref=t_ref, t_sample_h=t_sample_h, t_offset_h=t_offset)
+    
+    snapshots[i_snapshot]['intensity_b1'] = intensity_b1
+    snapshots[i_snapshot]['intensity_b2'] = intensity_b2
+    snapshots[i_snapshot]['n_bunches_b1'] = n_bunches_b1
+    snapshots[i_snapshot]['n_bunches_b2'] = n_bunches_b2
+    snapshots[i_snapshot]['energy_GeV'] = energy_GeV
+    snapshots[i_snapshot]['dict_hl_cell_by_cell'] = dict_hl_cell_by_cell
+    snapshots[i_snapshot]['hl_imped_sample'] = hl_imped_sample
+    snapshots[i_snapshot]['hl_sr_sample'] = hl_sr_sample
+    
+    
 
-    hli_calculator  = ihl.HeatLoadCalculatorImpedanceLHCArc()
-    hlsr_calculator  = srhl.HeatLoadCalculatorSynchrotronRadiationLHCArc()
-
-    hl_imped_fill = fc.HeatLoad_calculated_fill(fill_dict, hli_calculator, bct_dict=bct_bx, fbct_dict=fbct_bx, blength_dict=blength_bx)
-    hl_sr_fill = fc.HeatLoad_calculated_fill(fill_dict, hlsr_calculator, bct_dict=bct_bx, fbct_dict=fbct_bx, blength_dict=blength_bx)
-
-    hl_imped_t1 = hl.magnet_length['AVG_ARC'][0]*np.interp(t1, (hl_imped_fill.t_stamps-t_ref)/3600,  hl_imped_fill.heat_load_calculated_total)
-    hl_sr_t1 = hl.magnet_length['AVG_ARC'][0]*np.interp(t1, (hl_imped_fill.t_stamps-t_ref)/3600,  hl_sr_fill.heat_load_calculated_total)
-
-    if normtointen:
-        bct1_int = np.interp(t1, (bct_bx[1].t_stamps-t_ref)/3600, bct_bx[1].values)
-        bct2_int = np.interp(t1, (bct_bx[2].t_stamps-t_ref)/3600, bct_bx[2].values)
-        totintnorm = bct1_int+bct2_int
-    else:
-        totintnorm = 1.
-
-
+print 'REMINDER: Please write consistency check!!!!'
+    
 
 plt.close('all')
 ms.mystyle_arial(fontsz=12,dist_tick_lab=3)
-width = 0.6
-show_labels = True
-
-sectors = hl.sector_list()
-
-
-
-x_hist = np.linspace(minhist, maxhist, 1000)
-y_list = []
+if N_snapshots==1:
+    width = 0.6
+else:
+    width = 0.8
 spshare = None
-spsharehist = None
-figlist = []
+colorlist = ['b','r','g']
+
+for i, s in enumerate(hl.sector_list()):
+    
+    if normtointen:
+        totintnorm = (snapshots[i_snapshot]['intensity_b1']+snapshots[i_snapshot]['intensity_b2'])
+    else:
+        totintnorm = 1.
+    
+    #single sector plot
+    fig_sect = plt.figure(1000+i, figsize=(12,8.5), tight_layout=False)
+    fig_sect.patch.set_facecolor('w')
+    ax1_sect = plt.subplot2grid((2,2), (0,0), colspan=2, sharey=spshare)
+    
+    spshare = ax1_sect
+
+    if N_snapshots==1:
+        if plot_model:
+            if args.legend:
+                label1, label2 = 'Imp', 'SR'
+            else:
+                label1, label2 = None, None
+                
+            hl_imped_t1 = snapshots[i_snapshot]['hl_imped_sample']
+            hl_sr_t1 = snapshots[i_snapshot]['hl_sr_sample']
+
+            ax1_sect.axhspan(ymin=0, ymax=hl_imped_t1/totintnorm, color='grey', alpha=0.5, label=label1)
+            ax1_sect.axhspan(ymin=hl_imped_t1/totintnorm, ymax=(hl_imped_t1+hl_sr_t1)/totintnorm, color='green', alpha=0.5, label=label2)
+            if args.legend:
+                ax1_sect.legend(bbox_to_anchor=(1,1), loc='upper left')
+    else:
+        if plot_model:
+            print('Info: the model line is plotted only when running with a single snapshot')
+            
+            
+    for i_snapshot in xrange(N_snapshots):
+        
+        this_hld = snapshots[i_snapshot]['dict_hl_cell_by_cell'][s]
+        cells = this_hld['cell_names']
+        hl_cells = this_hld['heat_loads']
+
+        # normalize to intiesity
+        if normtointen:
+            val1/= totintnorm
+
+        ind = np.arange(len(cells)) 
+        #alternating grey background
+        for igrey in ind[1::2]:
+            ax1_sect.axvspan(igrey-0.5, igrey+0.5, color='k', alpha=.1)
+            
+        #barplot
+        ax1_sect.bar(ind-width/2+i_snapshot*width/N_snapshots, hl_cells, width/N_snapshots, alpha=0.5, color=colorlist[i_snapshot])
 
 
-dict_hl_cellbycell = {}
-for i, s in enumerate(sectors[:]):
-
-    sect_str = str(s)
-    R_part = 'R'+sect_str[0]
-    L_part = 'L'+sect_str[1]
-
-    # Find values at t1 and t2 for each cell.
-    val1 = []
-    cells = []
-    for cell in hid.keys():
-        if '_D2' in cell or '_D3' in cell or '_D4' in cell or '_Q1' in cell:
-            continue
-        if R_part not in cell and L_part not in cell:
-            continue
-        try:
-            ind1 = np.argmin(np.abs((np.array(hid[cell].t_stamps) - t_ref)/3600 - t1))
-        except ValueError as e:
-            print('Got Error %s, skipping cell %s' % (e, cell))
-            continue
-        cellname = cell.split('_')[1]+'_'+cell.split('.POSST')[0][-1]
-        if int(cellname[:2])<11: continue # skip LSS and DS
-
-        #~ if cellname=='11L1_3': print cell, cellname
-        cells.append(cellname)
-
-
-        # remove offset
-        if t_offset is not None:
-            ind_offset = np.argmin(np.abs((np.array(hid[cell].t_stamps) - t_ref)/3600 - t_offset))
-            val_offset = float(hid[cell].values[ind_offset])
-            offset_info = ', no beam at %.2fh'%t_offset
+        if normtointen:
+            ax1_sect.set_ylabel('Norm. heat load [W/hc/p+]')
         else:
-            val_offset = 0.
-            offset_info = ''
+            ax1_sect.set_ylabel('Heat load [W/hc]')
+            
+            
+        ax1_sect.set_ylim(min_hl_scale, max_hl_scale)
+        
+        ax1_sect.set_xticks(ind)
+        ax1_sect.set_xticklabels(cells, rotation=90)
+        
+        ax1_sect.set_xlim(ind[0]-2*width, ind[-1]+2*width)
 
-        val1.append(float(hid[cell].values[ind1]) - val_offset)
+        fig_sect.subplots_adjust(left=.06, right=.96, top=0.9, hspace=0.35, bottom=0.07)
+            
+        #~ fig_sect.suptitle('Fill. %d started on %s\n(t=%.2fh, %s%s)\nSector %d, %d cells, %s'%(filln, tref_string,
+                            #~ t1, tagfname, offset_info, s, len(cells), {False:'recalc. values', True:'DB values'}[from_csv]))
 
-    val1 = np.array(val1)
-    cells = np.array(cells)
-
-    # Sort everything
-    # it's R(IP) 09, 10, 11, ... L(IP+1) 33, 32, ...
-    msk_l = (np.char.find(cells, 'L') > -1)
-    cells_lip = cells[msk_l]
-    cells_rip = cells[~msk_l]
-
-    #~ print val1.shape
-    #~ print msk_l.shape
-    val1_lip = val1[msk_l]
-    val1_rip = val1[~msk_l]
-
-    ind_sort = (np.argsort(cells_lip))[::-1]
-    cells_lip = cells_lip[ind_sort]
-    val1_lip = val1_lip[ind_sort]
-    ind_sort = swap_even_odd(np.argsort(cells_rip))
-    cells_rip = cells_rip[ind_sort]
-    val1_rip = val1_rip[ind_sort]
-
-    # swap 3 and 7 to recover the right order
-
-
-
-    cells = np.append(cells_rip, cells_lip)
-    val1 = np.append(val1_rip, val1_lip)
-    
-    dict_hl_cellbycell[s] = {'cell_names':cells, 'heat_loads':val1}
+        ax1_sect.yaxis.grid(True)
     
 
+plt.show()
 
 '''
 
