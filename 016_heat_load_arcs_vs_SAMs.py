@@ -267,7 +267,7 @@ for ii, group_name in enumerate(group_names):
             hl_curr = heatloads.timber_variables[kk].values
             bct1_int = np.interp(t_curr, bct_bx[1].t_stamps, bct_bx[1].values)
             bct2_int = np.interp(t_curr, bct_bx[2].t_stamps, bct_bx[2].values)
-            hl_norm = hl_curr/(bct1_int+bct2_int)
+            hl_norm = (hl_curr-offset)/(bct1_int+bct2_int)
             hl_norm[(bct1_int+bct2_int)<int_cut_norm] = 0.
             spavbl.plot((t_curr-t_ref)/3600, hl_norm,'-', color=colorcurr, lw=2.)
 
@@ -296,7 +296,7 @@ for ii, group_name in enumerate(group_names):
     sphlcell.set_ylabel('Heat load [W]')
 
     #~ sphlcell.set_xlabel('Time [h]')
-    sphlcell.legend(prop={'size':myfontsz}, bbox_to_anchor=(1.1, 1.0),  loc='upper left')
+    sphlcell.legend(prop={'size':myfontsz}, bbox_to_anchor=(1.15, 1.0),  loc='upper left')
     sphlcell.grid('on')
     
     if normtointen:
