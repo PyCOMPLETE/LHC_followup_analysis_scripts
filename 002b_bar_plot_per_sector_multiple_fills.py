@@ -25,12 +25,6 @@ t_offset = None
 min_hl_scale = None
 max_hl_scale = None
 tagfname = ''
-#histogram parameters
-minhist = -5
-maxhist = 230
-nbinhist = 20
-
-
 
 
 # parse arguments
@@ -72,6 +66,20 @@ plot_model = not args.no_plot_model
 
 from_csv = args.fromcsv
 normtointen = args.normtointensity
+
+
+#histogram parameters
+if not normtointen:
+    minhist = -5
+    maxhist = 230
+    nbinhist = 20
+    distr_bw = 7
+else:
+    minhist = -.5e-13
+    maxhist = 5e-13
+    nbinhist = 20
+    distr_bw = 7/2e14
+
 
 
 # beuild snaphosts dicts
@@ -125,6 +133,7 @@ for i_snapshot in xrange(N_snapshots):
     t_fill_end = dict_fill_bmodes[filln]['t_endfill']
     t_ref=t_fill_st
     tref_string=time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime(t_ref))
+    tref_string_short=time.strftime("%d %b %Y %H:%M", time.localtime(t_ref))
 
     # extract standard fill data
     fill_dict = {}
@@ -150,32 +159,44 @@ for i_snapshot in xrange(N_snapshots):
     snapshots[i_snapshot]['dict_hl_cell_by_cell'] = dict_hl_cell_by_cell
     snapshots[i_snapshot]['hl_imped_sample'] = hl_imped_sample
     snapshots[i_snapshot]['hl_sr_sample'] = hl_sr_sample
+    snapshots[i_snapshot]['tref_string_short'] = tref_string_short
     
+    if t_offset_h is None:
+        snapshots[i_snapshot]['t_offs_h_str'] = '-'
+    else:
+        snapshots[i_snapshot]['t_offs_h_str'] = '%.2f'%snapshots[i_snapshot]['t_offs_h']
     
 
 print 'REMINDER: Please write consistency check!!!!'
     
+    
 
 plt.close('all')
-ms.mystyle_arial(fontsz=12,dist_tick_lab=3)
+myfontsz = 13
+ms.mystyle_arial(fontsz=13,dist_tick_lab=3)
 if N_snapshots==1:
     width = 0.6
 else:
     width = 0.8
 spshare = None
+spsharehist = None
 colorlist = ['b','r','g']
+colorleglist = ['#7F7FFF', '#FF7F7F', '#7FBF7F']
+x_hist = np.linspace(minhist, maxhist, 1000)
+y_list = []
+figlist = []
 
 for i, s in enumerate(hl.sector_list()):
     
-    if normtointen:
-        totintnorm = (snapshots[i_snapshot]['intensity_b1']+snapshots[i_snapshot]['intensity_b2'])
-    else:
-        totintnorm = 1.
     
     #single sector plot
     fig_sect = plt.figure(1000+i, figsize=(12,8.5), tight_layout=False)
     fig_sect.patch.set_facecolor('w')
     ax1_sect = plt.subplot2grid((2,2), (0,0), colspan=2, sharey=spshare)
+    axhist = plt.subplot2grid((2,2), (1,0), colspan=1, sharey=spsharehist, sharex=spsharehist)
+    spsharehist = axhist
+    
+    sptable =  plt.subplot2grid((2,2), (1,1), colspan=1, sharey=spsharehist, sharex=spsharehist)
     
     spshare = ax1_sect
 
@@ -202,11 +223,16 @@ for i, s in enumerate(hl.sector_list()):
         
         this_hld = snapshots[i_snapshot]['dict_hl_cell_by_cell'][s]
         cells = this_hld['cell_names']
-        hl_cells = this_hld['heat_loads']
+        hl_cells = this_hld['heat_loads'].copy()
 
-        # normalize to intiesity
+        # normalize to intensity
         if normtointen:
-            val1/= totintnorm
+            totintnorm = (snapshots[i_snapshot]['intensity_b1']+snapshots[i_snapshot]['intensity_b2'])
+        else:
+            totintnorm = 1.
+
+        if normtointen:
+            hl_cells/= totintnorm
 
         ind = np.arange(len(cells)) 
         #alternating grey background
@@ -214,8 +240,10 @@ for i, s in enumerate(hl.sector_list()):
             ax1_sect.axvspan(igrey-0.5, igrey+0.5, color='k', alpha=.1)
             
         #barplot
-        ax1_sect.bar(ind-width/2+i_snapshot*width/N_snapshots, hl_cells, width/N_snapshots, alpha=0.5, color=colorlist[i_snapshot])
-
+        #~ ax1_sect.bar(ind-width/2+i_snapshot*width/N_snapshots, hl_cells, width/N_snapshots, 
+            #~ color=colorleglist[i_snapshot], edgecolor=colorleglist[i_snapshot], linewidth = 0)
+        ax1_sect.bar(ind-width/2+i_snapshot*width/N_snapshots, hl_cells, width/N_snapshots, 
+            color=colorlist[i_snapshot], alpha=.5)
 
         if normtointen:
             ax1_sect.set_ylabel('Norm. heat load [W/hc/p+]')
@@ -232,13 +260,67 @@ for i, s in enumerate(hl.sector_list()):
 
         fig_sect.subplots_adjust(left=.06, right=.96, top=0.9, hspace=0.35, bottom=0.07)
             
-        #~ fig_sect.suptitle('Fill. %d started on %s\n(t=%.2fh, %s%s)\nSector %d, %d cells, %s'%(filln, tref_string,
-                            #~ t1, tagfname, offset_info, s, len(cells), {False:'recalc. values', True:'DB values'}[from_csv]))
-
         ax1_sect.yaxis.grid(True)
+        
+        # histogram
+        histval, binedges = np.histogram(hl_cells, bins=nbinhist, range=(minhist, maxhist))
+        
+        normhist = histval/(len(hl_cells)*np.mean(np.diff(binedges)))
+        axhist.bar(left=binedges[:-1], width=np.diff(binedges), height=normhist, alpha=0.5, color=colorlist[i_snapshot], edgecolor='none')
+    
+        import statsmodels.api as sm
+        obstat = sm.nonparametric.KDEUnivariate(hl_cells)
+        obstat.fit()
+        obstat.fit(bw=distr_bw)
+        density = obstat.evaluate
+        tempy = density(x_hist)
+        axhist.plot(x_hist, tempy, linewidth=3, color=colorlist[i_snapshot], alpha=0.8)
+        axhist.grid('on')
+        axhist.set_xlim(minhist, maxhist)
+        
+        y_list.append(tempy)
+        
+    to_table = []
+    to_table.append(['Fill'] + ['%d'%snapshots[i_snapshot]['filln'] for i_snapshot in xrange(N_snapshots)])
+    to_table.append(['Started on'] + [snapshots[i_snapshot]['tref_string_short'] for i_snapshot in xrange(N_snapshots)])
+    to_table.append(['T_sample [h]'] + ['%.2f'%snapshots[i_snapshot]['t_h'] for i_snapshot in xrange(N_snapshots)])
+    to_table.append(['N_bunches (B1/B2)'] + ['%d/%d'%(snapshots[i_snapshot]['n_bunches_b1'],snapshots[i_snapshot]['n_bunches_b2']) for i_snapshot in xrange(N_snapshots)])
+    to_table.append(['Intensity [p] (B1/B2)'] + ['%.2e/%.2e'%(snapshots[i_snapshot]['intensity_b1'],snapshots[i_snapshot]['intensity_b2']) for i_snapshot in xrange(N_snapshots)])
+    to_table.append(['Energy [GeV]'] + ['%.0f'%(snapshots[i_snapshot]['energy_GeV']) for i_snapshot in xrange(N_snapshots)])
+    to_table.append(['H.L. S%d (avg) [W]'%s] + ['%.2f' %(np.mean(snapshots[i_snapshot]['dict_hl_cell_by_cell'][s]['heat_loads'])) for i_snapshot in xrange(N_snapshots)])
+    to_table.append(['H.L. S%d (std) [W]'%s] + ['%.2f' %(np.std(snapshots[i_snapshot]['dict_hl_cell_by_cell'][s]['heat_loads'])) for i_snapshot in xrange(N_snapshots)])
+    to_table.append(['H.L. exp. imped. [W]'] + ['%.2f' %(snapshots[i_snapshot]['hl_imped_sample']) for i_snapshot in xrange(N_snapshots)])
+    to_table.append(['H.L. exp. synrad [W]'] + ['%.2f' %( snapshots[i_snapshot]['hl_sr_sample']) for i_snapshot in xrange(N_snapshots)])
+    to_table.append(['T_nobeam [h]'] + [snapshots[i_snapshot]['t_offs_h_str'] for i_snapshot in xrange(N_snapshots)])
+
+
+    sptable.axis('tight')
+    sptable.axis('off')
+    table = sptable.table(cellText=to_table,loc='center', cellLoc='center', colColours=['w']+colorleglist[:N_snapshots])
+    table.scale(1,1.5)
+    table.auto_set_font_size(False)
+    table.set_fontsize(myfontsz-1)
+    fig_sect.suptitle('Sector %d, %d cells, %s'%(s, len(cells), {False:'recalc. values', True:'DB values'}[from_csv]))
+    figlist.append(fig_sect)
+    
+    
+if args.o:
+    
+    str_file = 'multiple_'
+    for i_snapshot, snapshot in enumerate(snapshots):
+        str_file += 'fill%dat%.2fh_'%(snapshot['filln'], snapshot['t_h'])
+    
+    if normtointen:
+        str_file+='hlnorm'
+    else:
+        str_file+='hl'
+    
+    for fig, s in zip(figlist, hl.sector_list()):
+        fig.savefig('cell_by_cell_plots/cellbycell_%s_%s_sector%d.png'%(str_file, tagfname, s), dpi=200)
     
 
 plt.show()
+
 
 '''
 
