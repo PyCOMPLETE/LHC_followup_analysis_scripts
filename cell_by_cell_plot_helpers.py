@@ -114,12 +114,15 @@ def extract_and_compute_extra_fill_data(fill_dict, t_ref, t_sample_h, thresh_bin
     intensity_b1 = np.interp(t_sample_h, (bct_bx[1].t_stamps-t_ref)/3600, bct_bx[1].values)
     intensity_b2 = np.interp(t_sample_h, (bct_bx[2].t_stamps-t_ref)/3600, bct_bx[2].values)
     
+    bl_ave_b1 = np.interp(t_sample_h, (blength_bx[1].t_stamps-t_ref)/3600, blength_bx[1].avblen)
+    bl_ave_b2 = np.interp(t_sample_h, (blength_bx[2].t_stamps-t_ref)/3600, blength_bx[2].avblen)
+    
     n_bunches_b1 = np.sum(fbct_bx[1].nearest_older_sample(t_sample_h*3600+t_ref)>thresh_bint)
-    n_bunches_b2 = np.sum(fbct_bx[1].nearest_older_sample(t_sample_h*3600+t_ref)>thresh_bint)
+    n_bunches_b2 = np.sum(fbct_bx[2].nearest_older_sample(t_sample_h*3600+t_ref)>thresh_bint)
     
     energy_GeV = energy(fill_dict, beam=1).nearest_older_sample(t_sample_h*3600+t_ref)
         
-    return intensity_b1, intensity_b2, n_bunches_b1, n_bunches_b2, energy_GeV, hl_imped_sample, hl_sr_sample
+    return intensity_b1, intensity_b2, bl_ave_b1, bl_ave_b2, n_bunches_b1, n_bunches_b2, energy_GeV, hl_imped_sample, hl_sr_sample
     
     
     
