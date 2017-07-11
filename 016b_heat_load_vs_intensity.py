@@ -42,6 +42,7 @@ parser.add_argument('--savefig', help='Save figures in pdijksta dir.', action='s
 parser.add_argument('--make-table-bint', metavar='B_int [e11]', help='Print heat loads at a certain bunch intensity.', type=float)
 parser.add_argument('--make-table-blen', metavar='Bunch length [ns]', help='Print heat loads at a certain bunch length.', type=float)
 parser.add_argument('--make-table-time', metavar='Time [h]', help='Print heat loads at a certain moment', type=float)
+parser.add_argument('--normtonbunches', help='Normalize to number of bunches', action='store_true')
 args = parser.parse_args()
 
 
@@ -102,12 +103,15 @@ for df in data_folder_list:
 fig_vs_int = pl.figure(100, figsize=(9,6))
 fig_vs_int.patch.set_facecolor('w')
 #~ fig_vs_int.set_size_inches(15., 8.)
-fig_vs_int.subplots_adjust(right=0.80, wspace=0.72, bottom=.13, top=.87, left=0.11)
+fig_vs_int.subplots_adjust(right=0.80, wspace=0.72, bottom=.13, top=.87, left=0.13)
 
 spvsint = pl.subplot(1,1,1)
 spvsint.grid('on')
 spvsint.set_xlabel('Bunch intensity [p+]')
-spvsint.set_ylabel('Heat load from e-cloud [W/hc]')
+if args.normtonbunches:
+    spvsint.set_ylabel('Heat load from e-cloud [W/hc/bunch]')
+else:
+    spvsint.set_ylabel('Heat load from e-cloud [W/hc]')
 
 fig_blen_vs_int = pl.figure(200, figsize=(9, 6))
 fig_blen_vs_int.patch.set_facecolor('w')
@@ -294,8 +298,14 @@ for i_fill, filln in enumerate(filln_list):
         else:
             sp_vs_int_label = None
             imp_sr_label = None
+            
+        if args.normtonbunches:
+            normto = 2*n_bunches
+        else:
+            normto = 1.
+        
         xx = total_bint_hl
-        yy = heatloads.timber_variables[kk].values[mask_he]-offset-subtract
+        yy = (heatloads.timber_variables[kk].values[mask_he]-offset-subtract)/normto
         mask = xx > 0.3e11
         xx = xx[mask]
         yy = yy[mask]

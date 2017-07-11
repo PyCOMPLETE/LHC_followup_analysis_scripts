@@ -38,6 +38,7 @@ parser.add_argument('--normtointensity', help='Normalize to beam intensity', act
 parser.add_argument('--add-csv-to-fill-dict', nargs='+', default=[])
 parser.add_argument('--full-varname-in-legend', help='Do not shorten varnames.', action='store_true')
 parser.add_argument('--colormap', help='chose between hsv and rainbow', default='hsv')
+parser.add_argument('--with_press_drop', help='Use pressure drop for recalculated data.', action='store_true')
 
 parser.add_argument('--custom_vars', help='Custom list of variables to plot', nargs='+', default=[])
 
@@ -55,6 +56,7 @@ flag_fbct = args.fbct
 plot_model = not args.noplotmodel
 plot_t_arr = True
 use_recalculated = args.use_recalc
+use_dP = args.with_press_drop
 group_names = args.varlists
 normtointen = args.normtointensity
 added_csvs = args.add_csv_to_fill_dict
@@ -66,9 +68,9 @@ pl.close('all')
 ms.mystyle_arial(fontsz=myfontsz, dist_tick_lab=8)
 
 blacklist = [
-'QRLAA_33L5_QBS947_D4.POSST',
+#'QRLAA_33L5_QBS947_D4.POSST',
 #~ 'QRLAA_13R4_QBS947_D2.POSST',
-'QRLAA_33L5_QBS947_D3.POSST',
+#'QRLAA_33L5_QBS947_D3.POSST',
 #'QRLEC_05L1_QBS947.POSST',
 #'QRLEA_05L8_QBS947.POSST',
 #'QRLEA_06L8_QBS947.POSST',
@@ -112,24 +114,22 @@ if os.path.isdir(data_folder_fill+'/fill_basic_data_csvs'):
     fill_dict = {}
     fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_basic_data_csvs/basic_data_fill_%d.csv'%filln, verbose=True))
     fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_bunchbybunch_data_csvs/bunchbybunch_data_fill_%d.csv'%filln, verbose=True))
-    if use_recalculated:
-        print 'Using recalc data'
-        fill_dict.update(qf.get_fill_dict(filln))
-    else:
+    if not use_recalculated:
         fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_heatload_data_csvs/heatloads_fill_%d.csv'%filln, verbose=False))
 else:
     # 2015 structure
     fill_dict = {}
     fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_csvs/fill_%d.csv'%filln, verbose=True))
 
-    if use_recalculated:
-        print 'Using recalc data'
-        # remove db values from dictionary (for 2015 cases)
-        for kk in fill_dict.keys():
-            if 'QBS' in kk and '.POSST'in kk:
-                fill_dict[kk] = 'Not recalculated'
-        fill_dict.update(qf.get_fill_dict(filln))
- 
+        
+
+if use_recalculated:
+    print 'Using recalc data'
+    # remove db values from dictionary (for 2015 cases)
+    for kk in fill_dict.keys():
+        if 'QBS' in kk and '.POSST'in kk:
+            fill_dict[kk] = 'Not recalculated'
+    fill_dict.update(qf.get_fill_dict(filln, use_dP=use_dP))
 # Handle additional csvs 
 for csv in added_csvs:
     fill_dict.update(tm.parse_timber_file(csv), verbose=True)
@@ -215,9 +215,8 @@ for ii, group_name in enumerate(group_names):
 
     ms.comb_legend(sptotint, spenergy, bbox_to_anchor=(1.1, 1),  loc='upper left', prop={'size':myfontsz})
 
-    group_name = group_names[ii]
     if use_recalculated:
-        string = 'Recalculated data'
+        string = 'Recalculated data - %s'%({True: 'with_dP', False: 'no_dP'}[args.with_press_drop])
     else:
         string = 'Logged data'
     pl.suptitle(' Fill. %d started on %s\n%s (%s)'%(filln, tref_string, group_name, string))
@@ -234,15 +233,15 @@ for ii, group_name in enumerate(group_names):
     # CORRECT ARC AVERAGES
     if not use_recalculated and (group_name == 'Arcs' or group_name == 'AVG_ARC') and filln < first_correct_filln:
         hl_corr_factors = []
-        for ii, varname in enumerate(dict_hl_groups[group_name]):
+        for jj, varname in enumerate(dict_hl_groups[group_name]):
             if varname not in blacklist:
-                hl_corr_factors.append(arc_correction_factor_list[ii])
+                hl_corr_factors.append(arc_correction_factor_list[jj])
         heatloads.correct_values(hl_corr_factors)
 
     if flag_average:
         hl_ts_curr, hl_aver_curr  = heatloads.mean()
-    for ii, kk in enumerate(heatloads.variable_list):
-        colorcurr = ms.colorprog(i_prog=ii, Nplots=len(heatloads.variable_list), cm=args.colormap)
+    for jj, kk in enumerate(heatloads.variable_list):
+        colorcurr = ms.colorprog(i_prog=jj, Nplots=len(heatloads.variable_list), cm=args.colormap)
         if t_zero is not None:
             offset = np.interp(t_ref+t_zero*3600, heatloads.timber_variables[kk].t_stamps, heatloads.timber_variables[kk].values)
         else:
