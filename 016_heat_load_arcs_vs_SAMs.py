@@ -23,6 +23,8 @@ import HeatLoadCalculators.FillCalculator as fc
 import GasFlowHLCalculator.qbs_fill as qf
 from data_folders import data_folder_list
 
+from blacklists import device_blacklist
+
 parser = argparse.ArgumentParser(description='Plot the heat loads for one LHC fill')
 parser.add_argument('filln', metavar='FILLN', type=int, help='LHC fill number')
 parser.add_argument('--varlists', help='Variable lists to plot. Choose from %s' % sorted(HL.heat_loads_plot_sets.keys()), nargs='+', default=['AVG_ARC'])
@@ -39,6 +41,8 @@ parser.add_argument('--add-csv-to-fill-dict', nargs='+', default=[])
 parser.add_argument('--full-varname-in-legend', help='Do not shorten varnames.', action='store_true')
 parser.add_argument('--colormap', help='chose between hsv and rainbow', default='hsv')
 parser.add_argument('--with_press_drop', help='Use pressure drop for recalculated data.', action='store_true')
+parser.add_argument('--ignore-device-blacklist', help='Use pressure drop for recalculated data.', action='store_true')
+
 
 parser.add_argument('--custom_vars', help='Custom list of variables to plot', nargs='+', default=[])
 
@@ -242,6 +246,10 @@ for ii, group_name in enumerate(group_names):
         hl_ts_curr, hl_aver_curr  = heatloads.mean()
     for jj, kk in enumerate(heatloads.variable_list):
         colorcurr = ms.colorprog(i_prog=jj, Nplots=len(heatloads.variable_list), cm=args.colormap)
+        
+        if kk in device_blacklist and not args.ignore_device_blacklist:
+            continue
+            
         if t_zero is not None:
             offset = np.interp(t_ref+t_zero*3600, heatloads.timber_variables[kk].t_stamps, heatloads.timber_variables[kk].values)
         else:

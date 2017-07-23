@@ -40,13 +40,14 @@ parser.add_argument('--nolog', help='Do not show logged data', action='store_tru
 parser.add_argument('--hist', help='Show histograms', action='store_true')
 parser.add_argument('--details', help='Show details of input data', action='store_true')
 parser.add_argument('--pdsave', help='Save fig in pdijksta folder', action='store_true')
-parser.add_argument('--simple-titles', help='No confusing plot titles', action='store_true')
+#parser.add_argument('--simple-titles', help='No confusing plot titles', action='store_true')
 parser.add_argument('--nobroken', help='Do not plot the cell with broken sensor', action='store_true')
 parser.add_argument('--separate', help='Show heat load for BS separately', action='store_true')
 parser.add_argument('--noshow', help='Do not call plt.show', action='store_true')
 parser.add_argument('--contributions', help='Show contributions', action='store_true')
 parser.add_argument('--no-use-dP', help='Load cell data without dP', action='store_true')
 parser.add_argument('--force-recalc', help='Recalc special qbs instead of loading from h5.', action='store_true')
+parser.add_argument('--crude-cell-swap', help='Swap cell /timber var relation..', action='store_true')
 args = parser.parse_args()
 
 filln = args.filln
@@ -58,6 +59,7 @@ hist = args.hist
 details = args.details
 use_dP = not args.no_use_dP
 use_new_cell = filln > 5700
+swap_cell_for_old_fills = args.crude_cell_swap
 
 myfontsz = 12
 ms.mystyle_arial(fontsz=myfontsz, dist_tick_lab=8)
@@ -81,20 +83,20 @@ cell_notation_recalc_logged = {
     new_cell: new_cell,
 }
 
-if args.simple_titles:
-    cell_title_dict = {
-            '13L5': '13L5',
-            '33L5': '33L5',
-            '13R4': '13R4',
-            '31L2': '31L2',
-            }
-else:
-    cell_title_dict = {
-            '13L5': '13L5 / 12R4',
-            '33L5': '33L5 / 32R4 (broken sensor)',
-            '13R4': '13R4 / 13L5 (reversed gas flow)',
-            '31L2': '31L2 / 32L2 (new cell)',
-            }
+#if args.simple_titles:
+cell_title_dict = {
+    '13L5': '13L5',
+    '33L5': '33L5',
+    '13R4': '13R4',
+    '31L2': '31L2',
+    }
+#else:
+#    cell_title_dict = {
+#            '13L5': '13L5 / 12R4',
+#            '33L5': '33L5 / 32R4 (broken sensor)',
+#            '13R4': '13R4 / 13L5 (reversed gas flow)',
+#            '31L2': '31L2 / 32L2 (new cell)',
+#            }
 cells_and_new = cells + [new_cell]
 affix_list = ['Q1', 'D2', 'D3', 'D4']
 beam_colors = {1: 'b', 2: 'r'}
@@ -119,15 +121,45 @@ else:
 
 # Dictionary for variables
 #if not use_new_cell:
-if True:
+if filln < 5700 and swap_cell_for_old_fills:
+    hl_dict_logged = {
+        '13R4': { # swapped magnets with cell
+            'Q1': 'QRLAA_13L5_QBS943_Q1.POSST',
+            'D2': 'QRLAA_13L5_QBS943_D2.POSST',
+            'D3': 'QRLAA_13L5_QBS943_D3.POSST',
+            'D4': 'QRLAA_13L5_QBS943_D4.POSST',
+            'Cell': 'QRLAA_13R4_QBS947.POSST',
+        },
+        '33L5': {
+            'Q1': 'QRLAA_33L5_QBS947_Q1.POSST',
+            'D2': 'QRLAA_33L5_QBS947_D2.POSST',
+            'D3': 'QRLAA_33L5_QBS947_D3.POSST',
+            'D4': 'QRLAA_33L5_QBS947_D4.POSST',
+            'Cell': 'QRLAA_33L5_QBS947.POSST',
+        },
+        '13L5': { # swapped magnets with cell
+            'Q1': 'QRLAA_13R4_QBS947_Q1.POSST',
+            'D4': 'QRLAA_13R4_QBS947_D2.POSST',  # swapped D2-D4
+            'D3': 'QRLAA_13R4_QBS947_D3.POSST',
+            'D2': 'QRLAA_13R4_QBS947_D4.POSST',  # swapped D2-D4
+            'Cell': 'QRLAA_13L5_QBS943.POSST',
+        },
+        '31L2': {
+            'Q1': 'QRLAB_31L2_QBS943_Q1.POSST',
+            'D2': 'QRLAB_31L2_QBS943_D2.POSST',
+            'D3': 'QRLAB_31L2_QBS943_D3.POSST',
+            'D4': 'QRLAB_31L2_QBS943_D4.POSST',
+            'Cell': 'QRLAB_31L2_QBS943.POSST',
+        },
+    }
+else:
     hl_dict_logged = {
         '13R4': {
-            # Swapped because reversed Gas flow
             'Q1': 'QRLAA_13R4_QBS947_Q1.POSST',
-            'D2': 'QRLAA_13R4_QBS947_D4.POSST',
+            'D2': 'QRLAA_13R4_QBS947_D2.POSST',
             'D3': 'QRLAA_13R4_QBS947_D3.POSST',
-            'D4': 'QRLAA_13R4_QBS947_D2.POSST',
-            'Cell': 'QRLAA_13L5_QBS943.POSST', # Yes this is correct
+            'D4': 'QRLAA_13R4_QBS947_D4.POSST',
+            'Cell': 'QRLAA_13R4_QBS947.POSST',
         },
         '33L5': {
             'Q1': 'QRLAA_33L5_QBS947_Q1.POSST',
@@ -141,7 +173,7 @@ if True:
             'D2': 'QRLAA_13L5_QBS943_D2.POSST',
             'D3': 'QRLAA_13L5_QBS943_D3.POSST',
             'D4': 'QRLAA_13L5_QBS943_D4.POSST',
-            'Cell': 'QRLAA_13R4_QBS947.POSST', # Yes this is correct
+            'Cell': 'QRLAA_13L5_QBS943.POSST',
         },
         '31L2': {
             'Q1': 'QRLAB_31L2_QBS943_Q1.POSST',
@@ -151,39 +183,6 @@ if True:
             'Cell': 'QRLAB_31L2_QBS943.POSST',
         },
     }
-## This did not fix the 2016 -> 2017 change
-#else:
-#    hl_dict_logged = {
-#        '13R4': {
-#            # Swapped because reversed Gas flow
-#            'Q1': 'QRLAA_13L5_QBS943_Q1.POSST',
-#            'D2': 'QRLAA_13L5_QBS943_D2.POSST',
-#            'D3': 'QRLAA_13L5_QBS943_D3.POSST',
-#            'D4': 'QRLAA_13L5_QBS943_D4.POSST',
-#            'Cell': 'QRLAA_13L5_QBS943.POSST',
-#        },
-#        '33L5': {
-#            'Q1': 'QRLAA_33L5_QBS947_Q1.POSST',
-#            'D2': 'QRLAA_33L5_QBS947_D2.POSST',
-#            'D3': 'QRLAA_33L5_QBS947_D3.POSST',
-#            'D4': 'QRLAA_33L5_QBS947_D4.POSST',
-#            'Cell': 'QRLAA_33L5_QBS947.POSST',
-#        },
-#        '13L5': {
-#            'Q1': 'QRLAA_13R4_QBS947_Q1.POSST',
-#            'D2': 'QRLAA_13R4_QBS947_D2.POSST', # Yes this is correct
-#            'D3': 'QRLAA_13R4_QBS947_D3.POSST',
-#            'D4': 'QRLAA_13R4_QBS947_D4.POSST',
-#            'Cell': 'QRLAA_13R4_QBS947.POSST',
-#        },
-#        '31L2': {
-#            'Q1': 'QRLAB_31L2_QBS943_Q1.POSST',
-#            'D2': 'QRLAB_31L2_QBS943_D2.POSST',
-#            'D3': 'QRLAB_31L2_QBS943_D3.POSST',
-#            'D4': 'QRLAB_31L2_QBS943_D4.POSST',
-#            'Cell': 'QRLAB_31L2_QBS943.POSST',
-#        },
-#    }
 
 # merge pickles and add info on location
 dict_fill_bmodes={}
@@ -284,10 +283,13 @@ for cell_ctr, cell in enumerate(cells):
         if logged:
             sp.plot(timestamps, values, label=affix+' logged', ls='--', lw=2., color=color)
         sp.plot(special_tt, special_hl[cell][affix], ls='-', lw=2., color=color, label=affix)
-    #sp.axvline(avg_time_hrs, color='black')
+    sp.axvline(avg_time_hrs, color='black')
+    # summed
     if logged:
         sp.plot(timestamps, summed_log, ls='--', lw=2., color='blue', label='Sum logged')
     sp.plot(special_tt, summed_re, ls='-', lw=2., color='blue', label='Sum')
+
+    # celss
     sp.plot(qbs_tt, qbs_ob.data[:,cell_index_dict[cell]], label='Cell recalc.', ls='-', lw=2., c='orange')
     cell_index = heatloads.variables.index(cell_vars['Cell'])
     if logged:
@@ -496,13 +498,19 @@ if details:
     special_tt = (special_atd.timestamps - special_atd.timestamps[0])/3600.
     special_vars = list(special_atd.variables)
     # Mask first and last hour
-    mask = np.logical_and(special_tt > 1, special_tt < special_tt[-1] -1)
+    mask = np.logical_and(special_tt > 0, special_tt < special_tt[-1] -0)
     special_tt = special_tt[mask]
 
+    #alternate_notation = {
+    #        '13L5': '12R4',
+    #        '33L5': '32R4',
+    #        '13R4': '13L5',
+    #        '31L2': '32L2',
+    #        }
     alternate_notation = {
-            '13L5': '12R4',
+            '13L5': '13L5',
             '33L5': '32R4',
-            '13R4': '13L5',
+            '13R4': '12R4',
             '31L2': '32L2',
             }
 
@@ -549,7 +557,7 @@ if details:
         qbs_special = cqs.compute_qbs_special(special_atd, separate=True)
         qbs_tt = (qbs_special['timestamps']-qbs_special['timestamps'][0])/3600.
         for cell_ctr, cell in enumerate(cells):
-            sp_ctr = cell_ctr +1
+            sp_ctr = cell_ctr+1
             sp = plt.subplot(2,2,sp_ctr, sharex=sp)
             sp.set_title(cell_title_dict[cell])
             sp.grid(True)

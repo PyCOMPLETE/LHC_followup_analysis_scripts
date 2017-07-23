@@ -75,6 +75,7 @@ for variable_file, h5_dir, file_name, temp_filepath, temp_file, data_file_func i
 
     with open(variable_file, 'r') as f:
         varlist = f.read().splitlines()[0].split(',')
+    print '%i Timber variables' % len(varlist)
     for ii, var in enumerate(varlist):
         if '.POSST' not in var:
             raise ValueError('%s does not have a .POSST' % var)
@@ -84,6 +85,8 @@ for variable_file, h5_dir, file_name, temp_filepath, temp_file, data_file_func i
 
     for filln in fill_sublist_2:
         h5_file = data_file_func(filln)
+        if h5_file in os.listdir(os.path.dirname(h5_file)):
+            continue
         this_temp_file = temp_file % filln
         print('Downloading csv for fill %i' % filln)
         t_start_fill = dict_fill_bmodes[filln]['t_startfill']
@@ -92,7 +95,17 @@ for variable_file, h5_dir, file_name, temp_filepath, temp_file, data_file_func i
         print('Aligning data for fill %i' % filln)
         htd_ob = SetOfHomogeneousNumericVariables(varlist, this_temp_file).aligned_object(dt_seconds)
         print('Creating h5 file for fill %i' % filln)
-        mfm.aligned_obj_to_h5(htd_ob, h5_file)
+        n_tries_max = 5
+        for n_try in xrange(n_tries_max):
+            try:
+                mfm.aligned_obj_to_h5(htd_ob, h5_file)
+                break
+            except Exception as e:
+                print('Saving of h5 failed')
+                time.sleep(10)
+        else:
+            print('Raise error after trying to save the h5 file %i times' % n_tries_max)
+            raise
 
         if os.path.isfile(h5_file) and os.path.getsize(h5_file) > 500:
             os.remove(this_temp_file)
