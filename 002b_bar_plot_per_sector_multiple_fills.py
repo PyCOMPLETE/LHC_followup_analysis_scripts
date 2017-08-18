@@ -61,14 +61,14 @@ normtointen = args.normtointensity
 #histogram parameters
 if not normtointen:
     minhist = -5
-    maxhist = 230
+    maxhist = 300
     nbinhist = 20
-    distr_bw = 7
+    distr_bw = 10
 else:
     minhist = -.5e-13
-    maxhist = 8e-13
+    maxhist = 300/6e14
     nbinhist = 20
-    distr_bw = 7/2e14
+    distr_bw = 10/6e14
 
 try:
     import locale
@@ -76,6 +76,7 @@ try:
 except Exception as err:
     print '\nDid not manage to set locale. Got:'
     print err
+    
 
 
 # beuild snaphosts dicts
@@ -221,7 +222,8 @@ for i, s in enumerate(hl.sector_list()):
         if plot_model:
             print('Info: the model line is plotted only when running with a single snapshot')
             
-            
+    
+    y_list.append([])        
     for i_snapshot in xrange(N_snapshots):
         
         this_hld = snapshots[i_snapshot]['dict_hl_cell_by_cell'][s]
@@ -290,7 +292,7 @@ for i, s in enumerate(hl.sector_list()):
         axhist.set_xlim(minhist, maxhist)
         axhist.ticklabel_format(style='sci', scilimits=(0,0),axis='y')
         
-        y_list.append(tempy)
+        y_list[-1].append(tempy)
         
     to_table = []
     to_table.append(['Fill'] + ['%d'%snapshots[i_snapshot]['filln'] for i_snapshot in xrange(N_snapshots)])
@@ -317,6 +319,55 @@ for i, s in enumerate(hl.sector_list()):
     figlist.append(fig_sect)
     
     
+
+# Violin plot
+plt.close(1);
+figviol = plt.figure(1, figsize=(12,5*2))
+figviol.set_facecolor('w')
+axviol = plt.subplot2grid((2,3), (0,0), colspan=3)
+maxdistr = np.max(np.array(y_list)[:])
+for i_snapshot, col_snsh, sign_shsh in zip([0,1], ['b', 'r'], [-1., 1.]):
+    for i, s in enumerate(hl.sector_list()):
+        #~ print i, i_snapshot
+        axviol.fill_betweenx(y=x_hist, x1=sign_shsh*y_list[i][i_snapshot]/maxdistr*0.9+2*(i+1), x2 = 2*(i+1), color=col_snsh, alpha=0.5)
+axviol.grid('on')
+
+axviol.set_xticks(2*(np.arange(8)+1))
+axviol.set_xticklabels(['Arc %d'%s for s in hl.sector_list()])
+
+if normtointen:
+    axviol.set_ylabel('Norm. heat load [W/hc/p+]')
+else:
+    axviol.set_ylabel('Heat load [W/hc]')
+axviol.set_ylim(min_hl_scale, max_hl_scale)
+axviol.set_xlim(1,17)
+
+
+to_table = []
+to_table.append(['Fill'] + ['%d'%snapshots[i_snapshot]['filln'] for i_snapshot in xrange(N_snapshots)])
+to_table.append(['Started on'] + [snapshots[i_snapshot]['tref_string_short'] for i_snapshot in xrange(N_snapshots)])
+to_table.append(['T_sample [h]'] + ['%.2f'%snapshots[i_snapshot]['t_h'] for i_snapshot in xrange(N_snapshots)])
+to_table.append(['Energy [GeV]'] + ['%.0f'%(snapshots[i_snapshot]['energy_GeV']) for i_snapshot in xrange(N_snapshots)])
+to_table.append(['N_bunches (B1/B2)'] + ['%d/%d'%(snapshots[i_snapshot]['n_bunches_b1'],snapshots[i_snapshot]['n_bunches_b2']) for i_snapshot in xrange(N_snapshots)])
+to_table.append(['Intensity (B1/B2) [p]'] + [('%.2e/%.2e'%(snapshots[i_snapshot]['intensity_b1'],snapshots[i_snapshot]['intensity_b2'])).replace('+', '') for i_snapshot in xrange(N_snapshots)])
+to_table.append(['Bun.len. (B1/B2) [ns]'] + ['%.2f/%.2f'%(snapshots[i_snapshot]['bl_ave_b1']/1e-9,snapshots[i_snapshot]['bl_ave_b2']/1e-9) for i_snapshot in xrange(N_snapshots)])
+to_table.append(['H.L. exp. imped. [W]'] + ['%.2f' %(snapshots[i_snapshot]['hl_imped_sample']) for i_snapshot in xrange(N_snapshots)])
+to_table.append(['H.L. exp. synrad [W]'] + ['%.2f' %( snapshots[i_snapshot]['hl_sr_sample']) for i_snapshot in xrange(N_snapshots)])
+to_table.append(['H.L. exp. imp.+SR [W/p+]'] + ['%.2e' %((snapshots[i_snapshot]['hl_imped_sample']+snapshots[i_snapshot]['hl_sr_sample'])/(snapshots[i_snapshot]['intensity_b1']+snapshots[i_snapshot]['intensity_b2'])) for i_snapshot in xrange(N_snapshots)])
+to_table.append(['T_nobeam [h]'] + [snapshots[i_snapshot]['t_offs_h_str'] for i_snapshot in xrange(N_snapshots)])
+
+
+sptable  =  plt.subplot2grid((2,3), (1,0), colspan=2)
+sptable.axis('tight')
+sptable.axis('off')
+table = sptable.table(cellText=to_table,loc='center', cellLoc='center', colColours=['w']+colorleglist[:N_snapshots])
+table.scale(1,1.5)
+table.auto_set_font_size(False)
+table.set_fontsize(myfontsz-1)
+
+figviol.suptitle('%s'%({False:'recalc. values', True:'DB values'}[from_csv]))
+
+
 if args.o:
     
     str_file = 'multiple_'
@@ -330,7 +381,8 @@ if args.o:
     
     for fig, s in zip(figlist, hl.sector_list()):
         fig.savefig(args.savein+'/cellbycell_%s_%s_sector%d.png'%(str_file, tagfname, s), dpi=200)
-    
+
+    figviol.savefig(args.savein+'/cellbycell_%s_%s_distrib.png'%(str_file, tagfname), dpi=200)
 
 plt.show()
 
