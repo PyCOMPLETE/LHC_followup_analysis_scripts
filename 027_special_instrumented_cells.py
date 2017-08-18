@@ -48,6 +48,7 @@ parser.add_argument('--contributions', help='Show contributions', action='store_
 parser.add_argument('--no-use-dP', help='Load cell data without dP', action='store_true')
 parser.add_argument('--force-recalc', help='Recalc special qbs instead of loading from h5.', action='store_true')
 parser.add_argument('--crude-cell-swap', help='Swap cell /timber var relation..', action='store_true')
+parser.add_argument('--xlim', help='Set xlim for plots in hours', nargs=2, type=float, default=(None, None))
 args = parser.parse_args()
 
 filln = args.filln
@@ -60,6 +61,7 @@ details = args.details
 use_dP = not args.no_use_dP
 use_new_cell = filln > 5700
 swap_cell_for_old_fills = args.crude_cell_swap
+force_xlim = args.xlim
 
 myfontsz = 12
 ms.mystyle_arial(fontsz=myfontsz, dist_tick_lab=8)
@@ -120,8 +122,38 @@ else:
 
 
 # Dictionary for variables
-#if not use_new_cell:
-if filln < 5700 and swap_cell_for_old_fills:
+hl_dict_logged = {
+    '13R4': {
+        'Q1': 'QRLAA_13R4_QBS947_Q1.POSST',
+        'D2': 'QRLAA_13R4_QBS947_D2.POSST',
+        'D3': 'QRLAA_13R4_QBS947_D3.POSST',
+        'D4': 'QRLAA_13R4_QBS947_D4.POSST',
+        'Cell': 'QRLAA_13R4_QBS947.POSST',
+    },
+    '33L5': {
+        'Q1': 'QRLAA_33L5_QBS947_Q1.POSST',
+        'D2': 'QRLAA_33L5_QBS947_D2.POSST',
+        'D3': 'QRLAA_33L5_QBS947_D3.POSST',
+        'D4': 'QRLAA_33L5_QBS947_D4.POSST',
+        'Cell': 'QRLAA_33L5_QBS947.POSST',
+    },
+    '13L5': {
+        'Q1': 'QRLAA_13L5_QBS943_Q1.POSST',
+        'D2': 'QRLAA_13L5_QBS943_D2.POSST',
+        'D3': 'QRLAA_13L5_QBS943_D3.POSST',
+        'D4': 'QRLAA_13L5_QBS943_D4.POSST',
+        'Cell': 'QRLAA_13L5_QBS943.POSST',
+    },
+    '31L2': {
+        'Q1': 'QRLAB_31L2_QBS943_Q1.POSST',
+        'D2': 'QRLAB_31L2_QBS943_D2.POSST',
+        'D3': 'QRLAB_31L2_QBS943_D3.POSST',
+        'D4': 'QRLAB_31L2_QBS943_D4.POSST',
+        'Cell': 'QRLAB_31L2_QBS943.POSST',
+    },
+}
+
+if swap_cell_for_old_fills and filln < 5700:
     hl_dict_logged = {
         '13R4': { # swapped magnets with cell
             'Q1': 'QRLAA_13L5_QBS943_Q1.POSST',
@@ -142,37 +174,6 @@ if filln < 5700 and swap_cell_for_old_fills:
             'D4': 'QRLAA_13R4_QBS947_D2.POSST',  # swapped D2-D4
             'D3': 'QRLAA_13R4_QBS947_D3.POSST',
             'D2': 'QRLAA_13R4_QBS947_D4.POSST',  # swapped D2-D4
-            'Cell': 'QRLAA_13L5_QBS943.POSST',
-        },
-        '31L2': {
-            'Q1': 'QRLAB_31L2_QBS943_Q1.POSST',
-            'D2': 'QRLAB_31L2_QBS943_D2.POSST',
-            'D3': 'QRLAB_31L2_QBS943_D3.POSST',
-            'D4': 'QRLAB_31L2_QBS943_D4.POSST',
-            'Cell': 'QRLAB_31L2_QBS943.POSST',
-        },
-    }
-else:
-    hl_dict_logged = {
-        '13R4': {
-            'Q1': 'QRLAA_13R4_QBS947_Q1.POSST',
-            'D2': 'QRLAA_13R4_QBS947_D2.POSST',
-            'D3': 'QRLAA_13R4_QBS947_D3.POSST',
-            'D4': 'QRLAA_13R4_QBS947_D4.POSST',
-            'Cell': 'QRLAA_13R4_QBS947.POSST',
-        },
-        '33L5': {
-            'Q1': 'QRLAA_33L5_QBS947_Q1.POSST',
-            'D2': 'QRLAA_33L5_QBS947_D2.POSST',
-            'D3': 'QRLAA_33L5_QBS947_D3.POSST',
-            'D4': 'QRLAA_33L5_QBS947_D4.POSST',
-            'Cell': 'QRLAA_33L5_QBS947.POSST',
-        },
-        '13L5': {
-            'Q1': 'QRLAA_13L5_QBS943_Q1.POSST',
-            'D2': 'QRLAA_13L5_QBS943_D2.POSST',
-            'D3': 'QRLAA_13L5_QBS943_D3.POSST',
-            'D4': 'QRLAA_13L5_QBS943_D4.POSST',
             'Cell': 'QRLAA_13L5_QBS943.POSST',
         },
         '31L2': {
@@ -232,7 +233,6 @@ heatloads = SetOfHomogeneousNumericVariables(variable_list=variable_list, timber
 
 y_min, y_max = -10, np.max(heatloads.data)+5
 timestamps = (heatloads.timestamps - heatloads.timestamps[0])/3600.
-mask_mean = np.abs(timestamps - avg_time_hrs) < avg_pm_hrs
 
 
 # Recalculated objects
@@ -276,14 +276,13 @@ for cell_ctr, cell in enumerate(cells):
         var = cell_vars[affix]
         row_ctr = heatloads.variables.index(var)
         values = heatloads.data[:,row_ctr]
-        mean_hl = np.mean(values[mask_mean])
         summed_log += values
-        summed_re += special_hl[cell][affix]
+        summed_re += special_hl[cell][affix]['Sum']
         color = ms.colorprog(ctr, cell_vars)
         if logged:
             sp.plot(timestamps, values, label=affix+' logged', ls='--', lw=2., color=color)
-        sp.plot(special_tt, special_hl[cell][affix], ls='-', lw=2., color=color, label=affix)
-    sp.axvline(avg_time_hrs, color='black')
+        sp.plot(special_tt, special_hl[cell][affix]['Sum'], ls='-', lw=2., color=color, label=affix)
+    #sp.axvline(avg_time_hrs, color='black')
     # summed
     if logged:
         sp.plot(timestamps, summed_log, ls='--', lw=2., color='blue', label='Sum logged')
@@ -297,6 +296,7 @@ for cell_ctr, cell in enumerate(cells):
     sp.set_ylim(-20, None)
     if sp_ctr == 2:
         ms.comb_legend(sp,sp2,bbox_to_anchor=(1.8,1), fontsize=myfontsz)
+    sp.set_xlim(force_xlim)
 
 # Also show LHC hist
 def round_to(arr, precision):
@@ -422,9 +422,9 @@ for cell_ctr, cell in enumerate(cells):
             continue
         color = ms.colorprog(a_ctr, affix_list)
         if affix == 'Q1':
-            sp_quad.plot(special_tt, special_hl[cell][affix], color=color, ls=ls, label=cell, lw=2)
+            sp_quad.plot(special_tt, special_hl[cell][affix]['Sum'], color=color, ls=ls, label=cell, lw=2)
         else:
-            sp_dip.plot(special_tt, special_hl[cell][affix], color=color, ls=ls, label=cell+ ' ' + affix, lw=2)
+            sp_dip.plot(special_tt, special_hl[cell][affix]['Sum'], color=color, ls=ls, label=cell+ ' ' + affix, lw=2)
 
 for sp, title in zip((sp_dip, sp_quad), ('Dipoles', 'Quadrupoles')):
     sp.grid(True)
@@ -637,7 +637,7 @@ if args.contributions:
         bottom = np.copy(top)
 
         # Quad
-        data = special_hl[cell]['Q1']
+        data = special_hl[cell]['Q1']['Sum']
         offset = compute_offset(xx_time, data)
         top += data-offset
         sp.fill_between(xx_time, bottom, top, label='Average quad', alpha=0.5, color='orange')
@@ -645,7 +645,7 @@ if args.contributions:
 
         # Rest
         # Make sure the rest is not smaller than imp+sr+quad
-        data = special_hl[cell]['Sum'] - special_hl[cell]['Q1']
+        data = special_hl[cell]['Sum'] - special_hl[cell]['Q1']['Sum']
         offset = compute_offset(xx_time, data)
         top = data-offset
         sp.fill_between(xx_time, bottom, top, label='Dipoles and drifts', alpha=0.5, color='green')

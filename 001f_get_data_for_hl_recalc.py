@@ -112,3 +112,4 @@ for variable_file, h5_dir, file_name, temp_filepath, temp_file, data_file_func i
             print('Deleted temporary file %s!' % (this_temp_file))
         else:
             print('Warning! Something went wrong for file %s!\nKeeping temporary file %s.' % (h5_file % filln, temp_file % filln))
+

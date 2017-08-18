@@ -10,13 +10,17 @@ import LHCMeasurementTools.cell_naming as cn
 
 import LHCMeasurementTools.LHC_Heatloads as hl
 
-filln = 5979
-t_sample_h = 3.3 
-t_offset_h = 2
+# filln = 5979
+# t_sample_h = 3.3 
+# t_offset_h = 2
 
-#~ filln = 5143
-#~ t_sample_h = 2.5
-#~ t_offset_h = .7
+filln = 5143
+t_sample_h = 2.5
+t_offset_h = .7
+
+filln = 4535
+t_sample_h = 2.7
+t_offset_h = .5
 
 window_corrector_avg_s = 180
 window_timber_avg = 100.
