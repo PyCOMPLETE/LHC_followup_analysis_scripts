@@ -65,7 +65,7 @@ if not normtointen:
     nbinhist = 20
     distr_bw = 10
 else:
-    minhist = -.5e-13
+    minhist = -.2e-13
     maxhist = 300/6e14
     nbinhist = 20
     distr_bw = 10/6e14
@@ -322,25 +322,42 @@ for i, s in enumerate(hl.sector_list()):
 
 # Violin plot
 plt.close(1);
-figviol = plt.figure(1, figsize=(12,5*2))
+figviol = plt.figure(1, figsize=(12,8.5))
 figviol.set_facecolor('w')
 axviol = plt.subplot2grid((2,3), (0,0), colspan=3)
 maxdistr = np.max(np.array(y_list)[:])
 for i_snapshot, col_snsh, sign_shsh in zip([0,1], ['b', 'r'], [-1., 1.]):
+
+    # normalize to intensity
+    if normtointen:
+        totintnorm = (snapshots[i_snapshot]['intensity_b1']+snapshots[i_snapshot]['intensity_b2'])
+    else:
+        totintnorm = 1.
+
+    axviol.plot(2*[18+0.1*sign_shsh], [-50,(snapshots[i_snapshot]['hl_imped_sample']+snapshots[i_snapshot]['hl_sr_sample'])/totintnorm], 
+        '.-', color=col_snsh, linewidth=2, markersize=10)
+
+
     for i, s in enumerate(hl.sector_list()):
         #~ print i, i_snapshot
-        axviol.fill_betweenx(y=x_hist, x1=sign_shsh*y_list[i][i_snapshot]/maxdistr*0.9+2*(i+1), x2 = 2*(i+1), color=col_snsh, alpha=0.5)
+        axviol.fill_betweenx(y=x_hist, x1=sign_shsh*y_list[i][i_snapshot]/maxdistr*0.9+2*(i+1), x2 = 2*(i+1), 
+            color=col_snsh, alpha=0.5)
+
+        axviol.plot([2*(i+1)], [np.nanmean(snapshots[i_snapshot]['dict_hl_cell_by_cell'][s]['heat_loads'])/totintnorm], 
+            '.-', markersize=10, color=col_snsh)
 axviol.grid('on')
 
-axviol.set_xticks(2*(np.arange(8)+1))
-axviol.set_xticklabels(['Arc %d'%s for s in hl.sector_list()])
+axviol.set_xticks(2*(np.arange(9)+1))
+axviol.set_xticklabels(['Arc %d'%s for s in hl.sector_list()]+['Impedance\n+Synch. rad.'])
 
 if normtointen:
     axviol.set_ylabel('Norm. heat load [W/hc/p+]')
 else:
     axviol.set_ylabel('Heat load [W/hc]')
+
+
 axviol.set_ylim(min_hl_scale, max_hl_scale)
-axviol.set_xlim(1,17)
+axviol.set_xlim(1,19)
 
 
 to_table = []
@@ -357,7 +374,7 @@ to_table.append(['H.L. exp. imp.+SR [W/p+]'] + ['%.2e' %((snapshots[i_snapshot][
 to_table.append(['T_nobeam [h]'] + [snapshots[i_snapshot]['t_offs_h_str'] for i_snapshot in xrange(N_snapshots)])
 
 
-sptable  =  plt.subplot2grid((2,3), (1,0), colspan=2)
+sptable  =  plt.subplot2grid((2,3), (1,0), colspan=3)
 sptable.axis('tight')
 sptable.axis('off')
 table = sptable.table(cellText=to_table,loc='center', cellLoc='center', colColours=['w']+colorleglist[:N_snapshots])

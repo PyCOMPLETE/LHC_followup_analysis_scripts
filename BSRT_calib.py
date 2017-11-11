@@ -208,7 +208,7 @@ def emittance_dictionary(filln=None):
         
         print 'Using calibration A-2017'
         
-    if filln>=6055:        
+    elif filln>=6055:        
 
         # From Nikos 15-08-2017
         for kk in e_dict.keys():
