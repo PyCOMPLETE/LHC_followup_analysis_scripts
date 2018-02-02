@@ -39,6 +39,10 @@ parser.add_argument('--tag', help='Tag of plot windows.', default='')
 parser.add_argument('-v', help='Verbose.', action='store_true')
 parser.add_argument('--legend', help='Plot a legend for Imp/SR', action='store_true')
 parser.add_argument('--normtointensity', help='Normalize to beam intensity', action='store_true')
+parser.add_argument('--first-cell', help='First cell to be plotted', type=float, default=11)
+parser.add_argument('--minhist', help='Minimum in histogram scales', type=float)
+parser.add_argument('--maxhist', help='Minimum in histogram scales', type=float)
+
 
 parser.add_argument('--at', help="Snapshots in the form: filln:5108!t_h:2.5!t_offs_h:0.05 filln:5108!t_h:3.5!t_offs_h:0.05", nargs='+')
 
@@ -69,6 +73,12 @@ else:
     maxhist = 300/6e14
     nbinhist = 20
     distr_bw = 10/6e14
+
+if args.maxhist:
+    maxhist = args.maxhist
+
+if args.minhist:
+    minhist = args.minhist
 
 try:
     import locale
@@ -146,7 +156,7 @@ for i_snapshot in xrange(N_snapshots):
     intensity_b1, intensity_b2, bl_ave_b1, bl_ave_b2, n_bunches_b1, n_bunches_b2, energy_GeV, hl_imped_sample, hl_sr_sample = cch.extract_and_compute_extra_fill_data(fill_dict, t_ref, t_sample_h, thresh_bint=3e10)
 
     # extract heat load data
-    dict_hl_cell_by_cell = cch.sample_and_sort_cell_by_cell(hid, t_ref=t_ref, t_sample_h=t_sample_h, t_offset_h=t_offset)
+    dict_hl_cell_by_cell = cch.sample_and_sort_cell_by_cell(hid, t_ref=t_ref, t_sample_h=t_sample_h, t_offset_h=t_offset, first_cell=args.first_cell)
     
     snapshots[i_snapshot]['intensity_b1'] = intensity_b1
     snapshots[i_snapshot]['intensity_b2'] = intensity_b2

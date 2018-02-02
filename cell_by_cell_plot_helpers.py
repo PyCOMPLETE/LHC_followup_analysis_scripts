@@ -11,7 +11,7 @@ def swap_even_odd(vect):
     return np.array(temp_list)
 
 
-def sample_and_sort_cell_by_cell(cell_by_cell_db_dictionary, t_ref, t_sample_h, t_offset_h):
+def sample_and_sort_cell_by_cell(cell_by_cell_db_dictionary, t_ref, t_sample_h, t_offset_h, first_cell=11):
     
     hid = cell_by_cell_db_dictionary
 
@@ -37,7 +37,7 @@ def sample_and_sort_cell_by_cell(cell_by_cell_db_dictionary, t_ref, t_sample_h, 
                 print('Got Error %s, skipping cell %s' % (e, cell))
                 continue
             cellname = cell.split('_')[1]+'_'+cell.split('.POSST')[0][-1]
-            if int(cellname[:2])<11: continue # skip LSS and DS
+            if int(cellname[:2])<=first_cell: continue # skip LSS and DS
 
             #~ if cellname=='11L1_3': print cell, cellname
             cells.append(cellname)
