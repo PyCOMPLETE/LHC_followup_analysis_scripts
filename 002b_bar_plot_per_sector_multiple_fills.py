@@ -400,6 +400,11 @@ if args.o:
     str_file = 'multiple_'
     for i_snapshot, snapshot in enumerate(snapshots):
         str_file += 'fill%dat%.2fh_'%(snapshot['filln'], snapshot['t_h'])
+        
+    folname = args.savein+'/cellbycell_%s_%s'%(str_file, tagfname)
+    
+    if not os.path.exists(folname):
+        os.mkdir(folname)
     
     if normtointen:
         str_file+='hlnorm'
@@ -407,9 +412,24 @@ if args.o:
         str_file+='hl'
     
     for fig, s in zip(figlist, hl.sector_list()):
-        fig.savefig(args.savein+'/cellbycell_%s_%s_sector%d.png'%(str_file, tagfname, s), dpi=200)
+        fig.savefig(folname+'/cellbycell_%s_%s_sector%d.png'%(str_file, tagfname, s), dpi=200)
 
-    figviol.savefig(args.savein+'/cellbycell_%s_%s_distrib.png'%(str_file, tagfname), dpi=200)
+    figviol.savefig(folname+'/cellbycell_%s_%s_distrib.png'%(str_file, tagfname), dpi=200)
+    
+    for sector in hl.sector_list():
+        fname = folname+'/cellbycell_%s_%s_sector%d.csv'%(str_file, tagfname, sector)
+        with open(fname, 'w') as fid:
+            fid.write('cell'+''.join([',snapshot%d'%isnap for isnap in xrange(len(snapshots))])+'\n')
+            for i_cell, cell in enumerate(snapshots[0]['dict_hl_cell_by_cell'][sector]['cell_names']):
+                fid.write(cell+''.join([',%.1e'%snapshots[isnap]['dict_hl_cell_by_cell'][sector]['heat_loads'][i_cell] for isnap in xrange(len(snapshots))])+'\n')
+    
+    fname = folname+'/cellbycell_%s_%s_generalinfo.txt'%(str_file, tagfname)            
+    with open(fname, 'w') as fid:
+        for llll in to_table:
+            fid.write('\t'.join(llll)+'\n')
+            
+            
+
 
 plt.show()
 
