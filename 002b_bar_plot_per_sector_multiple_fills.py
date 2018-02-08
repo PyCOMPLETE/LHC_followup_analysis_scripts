@@ -427,8 +427,22 @@ if args.o:
     with open(fname, 'w') as fid:
         for llll in to_table:
             fid.write('\t'.join(llll)+'\n')
-            
-            
+
+    import pickle
+    fnamepkl = folname+'/cellbycell_%s_%s.pkl'%(str_file, tagfname)
+    with open(fnamepkl, 'wb') as fid:
+        pickle.dump(snapshots, fid)
+
+
+    def default(obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        raise TypeError('Not serializable')
+
+    import json
+    fnamejson = folname+'/cellbycell_%s_%s.json'%(str_file, tagfname)
+    with open(fnamejson, 'wb') as fid:
+        json.dump(snapshots, fid, default=default)
 
 
 plt.show()
