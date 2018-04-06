@@ -36,7 +36,7 @@ temp_files = [t + '_%i.csv' for t in temp_filepaths]
 data_file_funcs = [h5_storage.get_data_file, h5_storage.get_special_data_file]
 
 if year == 2012:
-    fills_pkl_name = '/afs/cern.ch/work/l/lhcscrub/LHC_2012_25ns_period/fills_and_bmodes.pkl'
+    fills_pkl_name = '/afs/cern.ch/project/spsecloud/LHC_2012_selected_periods/fills_and_bmodes.pkl'
 elif year == 2015:
     fills_pkl_name = '/afs/cern.ch/project/spsecloud/LHC_2015_PhysicsAfterTS2/fills_and_bmodes.pkl'
 elif year == 2016:

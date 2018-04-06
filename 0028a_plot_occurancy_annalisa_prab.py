@@ -43,13 +43,13 @@ t_start_fill = dict_fill_bmodes[filln]['t_startfill']
 t_end_fill = dict_fill_bmodes[filln]['t_endfill']
 t_fill_len = t_end_fill - t_start_fill
 t_ref = t_start_fill
-n_traces = 5
+n_traces = 1
 
 
 
 #for 4947
-#~ list_scan_times_before_blowup = np.linspace(6.0, 6.5, n_traces)
-#~ list_scan_times_after_blowup = np.linspace(11.0, 11.5, n_traces)
+list_scan_times_before_blowup = np.linspace(5.5, 6.5, n_traces)
+list_scan_times_after_blowup = np.linspace(10.0, 110, n_traces)
 
 
 #for 4958
@@ -228,10 +228,10 @@ for beam in [1,2]:
     dict_beams['sigma_v_after_blowup'].append(avg_sigma_after_blowup)
     dict_beams['bunch_n'].append(scan_after_blowup.bunch_n)
 
-    import scipy.io as sio
-    sio.savemat('bbb_emi_dict%dB%d.mat'%(filln, beam),
-            {'sigma_v_before_blowup':dict_beams['sigma_v_before_blowup'],
-            'sigma_v_after_blowup':dict_beams['sigma_v_after_blowup'],
-            'bunch_n':dict_beams['bunch_n']}, oned_as='row')
+    #~ import scipy.io as sio
+    #~ sio.savemat('bbb_emi_dict%dB%d.mat'%(filln, beam),
+            #~ {'sigma_v_before_blowup':dict_beams['sigma_v_before_blowup'],
+            #~ 'sigma_v_after_blowup':dict_beams['sigma_v_after_blowup'],
+            #~ 'bunch_n':dict_beams['bunch_n']}, oned_as='row')
       
 pl.show()

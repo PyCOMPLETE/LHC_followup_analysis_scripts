@@ -116,7 +116,7 @@ pl.close('all')
 ms.mystyle_arial(fontsz=16, dist_tick_lab=5)
 
 fig_list = []
-for beam in [1,2]:
+for beam in [2]:
     energy = Energy.energy(fill_dict, beam=beam)
     bct = BCT.BCT(fill_dict, beam=beam)
     bsrt_calib_dict = BSRT_calib.emittance_dictionary(filln=filln)
@@ -137,7 +137,7 @@ for beam in [1,2]:
     sp_sigma_v = pl.subplot2grid((2,2), (1, 1), sharex = sp_sigma_h)
     
     t_offset = (t_start_STABLE-t_ref)/3600. 
-    
+        
     sp_emih.plot(((bsrt.t_stamps - t_ref)/3600.)-t_offset, bsrt.norm_emit_h, '.', markersize=.5, color='b')
     sp_emih.grid('on')
     sp_emih.set_ylabel('Hor. emittance [um]')
@@ -167,10 +167,12 @@ for beam in [1,2]:
                         continue
 
         if plot_emittance:
+  
             sp_sigma_h.plot(scan.bunch_n, scan.norm_emit_h, '.', color=colorcurr, 
                         label='%.1f'%((scan.t_start - t_ref)/3600.))
             sp_sigma_v.plot(scan.bunch_n, scan.norm_emit_v, '.', color=colorcurr)
 
+        
         else:
             sp_sigma_h.plot(scan.bunch_n, scan.sigma_h, '.', color=colorcurr,
                         label='%.1f'%((scan.t_start - t_ref)/3600.))
@@ -193,8 +195,8 @@ for beam in [1,2]:
         #~ sp_emiv.axvspan((scan.t_start - t_ref)/3600.-t_offset, (scan.t_stop - t_ref)/3600.-t_offset, 
                     #~ facecolor=colorcurr, alpha=0.6, linewidth=0)
     
-    sp_sigma_h.set_xlim(1950, 2450)
-    sp_sigma_v.set_xlim(1950, 2450)
+    sp_sigma_h.set_xlim(1050, 1550)
+    sp_sigma_v.set_xlim(1050, 1550)
     sp_sigma_h.set_ylim(0, 8)
     sp_sigma_v.set_ylim(0, 8)
     sp_sigma_h.set_xlabel('Bunch slot')

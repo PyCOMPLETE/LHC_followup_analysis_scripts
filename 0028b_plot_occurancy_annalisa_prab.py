@@ -77,7 +77,7 @@ for ic, beam in enumerate(beam_list):
     fig_vlines=pl.figure(beam+10, figsize=(7,6))
     fig_vlines.patch.set_facecolor('w')
     pl.vlines(b, [0], occurrence_percent, linewidth=2.0)
-    pl.title(r'%d%% vertical emittance growth B%d'%(delta_sigma_th*100,beam), fontsize=16)
+    pl.title(r'Blow-up larger than %d%%'%(delta_sigma_th*100), fontsize=16)
     pl.ylim(0,100)
     pl.xlim(0,75)
     pl.xlabel('Bunches #')
@@ -94,12 +94,13 @@ for ic, beam in enumerate(beam_list):
              align='center',edgecolor=beam_color[ic])
     pl.xlabel('Bunches #')
     pl.ylabel('Occurrence [%]')
-    pl.title(r'%d%% vertical emittance growth B%d'%(delta_sigma_th*100,beam), fontsize=16)
+    pl.title(r'Blow-up larger than %d%%'%(delta_sigma_th*100), fontsize=16)
     pl.ylim(0,100)
     pl.xlim(0,75)
     pl.grid('on')
     ms.mystyle_arial(18)
-    fig_h.savefig('plot_Annalisa_PRAB/BARPLOT_occurrence_B%d'%(beam), dpi=300)
+    fig_h.savefig('plot_Annalisa_PRAB/BARPLOT_occurrence_B%d.eps'%(beam), format='eps', dpi=1000)
+    fig_h.savefig('plot_Annalisa_PRAB/BARPLOT_occurrence_B%d.png'%(beam), dpi=300)
     
     
         

@@ -13,7 +13,7 @@ import os
 
 # BSRT scan parameters
 filln = 5372
-list_scan_times = np.linspace(1.7, 2.25, 20)
+list_scan_times = np.linspace(2.2, 3.1, 5)
 
 scan_thrld = 70
 plot_emittance = True
@@ -46,7 +46,7 @@ t_start_fill = dict_fill_bmodes[filln]['t_startfill']
 t_end_fill = dict_fill_bmodes[filln]['t_endfill']
 t_fill_len = t_end_fill - t_start_fill
 t_ref = t_start_fill
-n_traces = 50.
+n_traces = 5.
 
 
 
@@ -117,7 +117,8 @@ for beam in [1,2]:
     energy = Energy.energy(fill_dict, beam=beam)
     bct = BCT.BCT(fill_dict, beam=beam)
     bsrt_calib_dict = BSRT_calib.emittance_dictionary(filln=filln)
-    bsrt  = BSRT.BSRT(fill_dict, beam=beam, calib_dict=bsrt_calib_dict, average_repeated_meas=average_repeated_meas)
+    bsrt  = BSRT.BSRT(fill_dict, beam=beam, calib_dict=bsrt_calib_dict, 
+            average_repeated_meas=average_repeated_meas,filter_FESA_from=6)
     if plot_emittance:
         bsrt.calculate_emittances(energy)
 
@@ -187,6 +188,8 @@ for beam in [1,2]:
             sp_sigma_h.plot(scan.bunch_n, scan.sigma_h, '.', color=colorcurr)
             sp_sigma_v.plot(scan.bunch_n, scan.sigma_v, '.', color=colorcurr)
 
+        
+        
         sp_bunch.axvspan((scan.t_start - t_ref)/3600., (scan.t_stop - t_ref)/3600., facecolor=colorcurr, alpha=0.6, linewidth=0)
         sp_int.axvspan((scan.t_start - t_ref)/3600., (scan.t_stop - t_ref)/3600., facecolor=colorcurr, alpha=0.6, linewidth=0)
         sp_bunch.grid('on')
