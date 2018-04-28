@@ -15,7 +15,7 @@ import os
 filln = 5372
 list_scan_times = np.linspace(2.2, 3.1, 5)
 
-scan_thrld = 70
+scan_thrld = 1000
 plot_emittance = True
 
 average_repeated_meas = False
@@ -112,8 +112,10 @@ sp_t = None
 pl.close('all')
 ms.mystyle_arial(fontsz=16, dist_tick_lab=5)
 
+spemit = None
 fig_list = []
 for beam in [1,2]:
+
     energy = Energy.energy(fill_dict, beam=beam)
     bct = BCT.BCT(fill_dict, beam=beam)
     bsrt_calib_dict = BSRT_calib.emittance_dictionary(filln=filln)
@@ -165,8 +167,9 @@ for beam in [1,2]:
 
     # Sigma and emittance
     N_scans = len(list_scan_times)
-    sp_sigma_h = pl.subplot2grid((2,3), (0, 1), rowspan=1, colspan=2, sharex = sp_sigma_h)
-    sp_sigma_v = pl.subplot2grid((2,3), (1, 1), rowspan=1, colspan=2, sharex = sp_sigma_h)
+    sp_sigma_h = pl.subplot2grid((2,3), (0, 1), rowspan=1, colspan=2, sharex=sp_sigma_h, sharey=spemit)
+    spemit = sp_sigma_h
+    sp_sigma_v = pl.subplot2grid((2,3), (1, 1), rowspan=1, colspan=2, sharex=sp_sigma_h, sharey=spemit)
 
     for ii in xrange(N_scans):
         colorcurr = hsv_to_rgb(float(ii)/float(N_scans), 0.9, 1.)

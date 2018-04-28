@@ -19,7 +19,7 @@ blacklist.append(5488) # 40 hour long fill, also exceeds memory
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-r', help='reversed', action='store_true')
-parser.add_argument('--year', choices=[2012, 2015, 2016, 2017], type=int, default=2017)
+parser.add_argument('--year', choices=[2012, 2015, 2016, 2017, 2018], type=int, default=2018)
 
 args = parser.parse_args()
 year = args.year
@@ -42,7 +42,9 @@ elif year == 2015:
 elif year == 2016:
     fills_pkl_name = '/afs/cern.ch/project/spsecloud/LHC_2016_25ns/LHC_2016_25ns_beforeTS1/fills_and_bmodes.pkl'
 elif year == 2017:
-    fills_pkl_name = '/afs/cern.ch/work/l/lhcscrub/LHC_2017_operation/fills_and_bmodes.pkl'
+    fills_pkl_name = '/afs/cern.ch/project/spsecloud/LHC_2017_operation/LHC_2017_operation/fills_and_bmodes.pkl'
+elif year == 2018:
+    fills_pkl_name = '/afs/cern.ch/work/l/lhcscrub/LHC_2018_followup/fills_and_bmodes.pkl'
 else:
     raise ValueError('Invalid year')
 
