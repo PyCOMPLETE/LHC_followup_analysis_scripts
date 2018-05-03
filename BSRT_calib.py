@@ -208,7 +208,7 @@ def emittance_dictionary(filln=None):
         
         print 'Using calibration A-2017'
         
-    elif filln>=6055:        
+    elif filln>=6055 and filln<6611:        
 
         # From Nikos 15-08-2017
         for kk in e_dict.keys():
@@ -269,7 +269,23 @@ def emittance_dictionary(filln=None):
         e_dict['gamma'][6500]               = 6927.6
         
         print 'Using calibration B-2017'
-
+        
+    elif filln>=6611:
+        e_dict = {
+        'betaf_h': {450: {1: 205.05000000000001, 2: 196.71000000000001},
+          6500: {1: 200.0, 2: 195.90000000000001}},
+         'betaf_v': {450: {1: 286.83999999999997, 2: 358.23000000000002},
+          6500: {1: 300.0, 2: 359.89999999999998}},
+         'gamma': {450: 479.6, 6500: 6927.6},
+         'rescale_sigma_h': {450: {1: 1.0, 2: 1.0}, 6500: {1: 1.0, 2: 1.0}},
+         'rescale_sigma_v': {450: {1: 1.0, 2: 1.0}, 6500: {1: 1.0, 2: 1.0}},
+         'scale_h': {450: {}, 6500: {}},
+         'scale_v': {450: {}, 6500: {}},
+         'sigma_corr_h': {450: {1: 0.42520000000000002, 2: 0.50160000000000005},
+          6500: {1: 0.1973, 2: 0.27410000000000001}},
+         'sigma_corr_v': {450: {1: 0.40760000000000002, 2: 0.61850000000000005},
+          6500: {1: 0.21280000000000002, 2: 0.24940000000000001}}}
+        print 'Using calibration A-2018'
     else:         
         raise ValueError('What?!')     
     

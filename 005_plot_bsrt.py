@@ -46,7 +46,7 @@ t_start_fill = dict_fill_bmodes[filln]['t_startfill']
 t_end_fill = dict_fill_bmodes[filln]['t_endfill']
 t_fill_len = t_end_fill - t_start_fill
 t_ref = t_start_fill
-n_traces = 5.
+n_traces = 20
 
 
 

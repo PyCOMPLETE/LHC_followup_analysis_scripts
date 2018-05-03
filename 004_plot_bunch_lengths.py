@@ -110,11 +110,13 @@ i_fig = 0
 plt.close('all')
 ms.mystyle_arial(fontsz=16, dist_tick_lab=5)
 beam_col = ['b','r']
+fig_list = []
 for beam in [1,2]:
     blength = BQM.blength(fill_dict, beam = beam)
     bct = BCT.BCT(fill_dict, beam=beam)
     
     fig1 = plt.figure(i_fig, figsize=(14, 8))
+    fig_list.append(fig1)
     fig1.patch.set_facecolor('w')
     ax0 = plt.subplot(211, sharex=ax_t)
     ax_t = ax0
