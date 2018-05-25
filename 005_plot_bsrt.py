@@ -120,7 +120,7 @@ for beam in [1,2]:
     bct = BCT.BCT(fill_dict, beam=beam)
     bsrt_calib_dict = BSRT_calib.emittance_dictionary(filln=filln)
     bsrt  = BSRT.BSRT(fill_dict, beam=beam, calib_dict=bsrt_calib_dict, 
-            average_repeated_meas=average_repeated_meas,filter_FESA_from=6)
+            average_repeated_meas=average_repeated_meas,filter_FESA_from=None)
     if plot_emittance:
         bsrt.calculate_emittances(energy)
 
@@ -193,8 +193,8 @@ for beam in [1,2]:
 
         
         
-        sp_bunch.axvspan((scan.t_start - t_ref)/3600., (scan.t_stop - t_ref)/3600., facecolor=colorcurr, alpha=0.6, linewidth=0)
-        sp_int.axvspan((scan.t_start - t_ref)/3600., (scan.t_stop - t_ref)/3600., facecolor=colorcurr, alpha=0.6, linewidth=0)
+        sp_bunch.axvspan((scan.t_start - t_ref)/3600., (scan.t_stop - t_ref)/3600., facecolor=colorcurr, alpha=0.6, linewidth=1, edgecolor=colorcurr)
+        sp_int.axvspan((scan.t_start - t_ref)/3600., (scan.t_stop - t_ref)/3600., facecolor=colorcurr, alpha=0.6, linewidth=1, edgecolor=colorcurr)
         sp_bunch.grid('on')
 
         #sp_bunch.axvline((scan.t_start - t_ref)/3600., color=colorcurr, alpha=0.99)

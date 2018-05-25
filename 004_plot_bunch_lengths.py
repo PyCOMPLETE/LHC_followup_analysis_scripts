@@ -111,6 +111,7 @@ plt.close('all')
 ms.mystyle_arial(fontsz=16, dist_tick_lab=5)
 beam_col = ['b','r']
 fig_list = []
+axbl = None
 for beam in [1,2]:
     blength = BQM.blength(fill_dict, beam = beam)
     bct = BCT.BCT(fill_dict, beam=beam)
@@ -120,7 +121,8 @@ for beam in [1,2]:
     fig1.patch.set_facecolor('w')
     ax0 = plt.subplot(211, sharex=ax_t)
     ax_t = ax0
-    ax1 = plt.subplot(212)
+    ax1 = plt.subplot(212, sharex=axbl, sharey=axbl)
+    axbl = ax1
     
     ax0.plot((bct.t_stamps-t_ref)/3600., bct.values, color=beam_col[beam-1], lw=2)
     for i in xrange(0, n_traces):
