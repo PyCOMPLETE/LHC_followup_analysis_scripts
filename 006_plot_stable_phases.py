@@ -51,14 +51,18 @@ tref_string = time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime(t_ref))
 N_traces_set = None
 
 if len(sys.argv)>1:
-    
-     if np.any(map(lambda s: ('--n_traces'in s), sys.argv)):
+
+    if np.any(map(lambda s: ('--n_traces'in s), sys.argv)):
         i_arg = np.where(map(lambda s: ('--n_traces'in s), sys.argv))[0]
         arg_temp = sys.argv[i_arg]
         N_traces_set = float(arg_temp.split('=')[-1])
-
-         
-     if '--injection' in sys.argv:
+     
+    if '--obsbox' in sys.argv or '--ObsBox' in sys.argv:
+        obsbox = True
+    else:
+        obsbox = False
+        
+    if '--injection' in sys.argv:
         print 'Scans in the INJPHYS-PRERAMP beam modes'
         t_start_INJPHYS = dict_fill_bmodes[filln]['t_start_INJPHYS']
         t_start_RAMP = dict_fill_bmodes[filln]['t_start_RAMP']
@@ -66,31 +70,31 @@ if len(sys.argv)>1:
         list_scan_times = np.linspace((t_start_INJPHYS-t_ref)/3600., (t_start_RAMP-t_ref)/3600., N_traces_set)
 
         
-     if '--highenergy' in sys.argv:
+    if '--highenergy' in sys.argv:
         print 'Scans in the FLATTOP-STABLE beam modes'
         t_start_FLATTOP = dict_fill_bmodes[filln]['t_start_FLATTOP']
         t_start_STABLE = dict_fill_bmodes[filln]['t_start_STABLE']
         if N_traces_set==None: N_traces_set=30
         list_scan_times = np.linspace((t_start_FLATTOP-t_ref)/3600., (t_start_STABLE-t_ref)/3600.+0.5, N_traces_set)
 
-     if '--stablebeams' in sys.argv:
+    if '--stablebeams' in sys.argv:
         print 'Scans in the STABLE BEAMS'
         t_start_STABLE = dict_fill_bmodes[filln]['t_start_STABLE']
         t_end_STABLE = dict_fill_bmodes[filln]['t_stop_STABLE']
         if N_traces_set==None: N_traces_set=30
         list_scan_times = np.linspace((t_start_STABLE-t_ref)/3600., (t_end_STABLE-t_ref)/3600.+0.5, N_traces_set)
         
-     if '--ramp' in sys.argv:
+    if '--ramp' in sys.argv:
         print 'Scans in the RAMP'
         t_start_RAMP= dict_fill_bmodes[filln]['t_start_RAMP']
         t_end_RAMP = dict_fill_bmodes[filln]['t_stop_RAMP']
         if N_traces_set==None: N_traces_set=10
         list_scan_times = np.linspace((t_start_RAMP-t_ref)/3600., (t_end_RAMP-t_ref)/3600, N_traces_set)	
         
-     if '--sigma' in sys.argv:
+    if '--sigma' in sys.argv:
         plot_emittance=False
         
-     if np.any(map(lambda s: ('--interval'in s), sys.argv)):
+    if np.any(map(lambda s: ('--interval'in s), sys.argv)):
          i_arg = np.where(map(lambda s: ('--interval'in s), sys.argv))[0]
          arg_temp = sys.argv[i_arg]
          t_start_man = float(arg_temp.split('=')[-1].split(',')[0])
@@ -99,12 +103,12 @@ if len(sys.argv)>1:
          if N_traces_set==None: N_traces_set=30
          list_scan_times = np.linspace(t_start_man, t_end_man, N_traces_set)
          xlim = t_start_man, t_end_man
-     else:
+    else:
          xlim = None, None
         
-     if '--notrace' in sys.argv:
+    if '--notrace' in sys.argv:
         list_scan_times = []
-              
+                  
 
 fill_dict = {}
 fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_basic_data_csvs/basic_data_fill_%d.csv'%filln, verbose=True))
@@ -128,14 +132,17 @@ for beam in [1, 2]:
     energy = Energy.energy(fill_dict, beam=beam)
     bct = BCT.BCT(fill_dict, beam=beam)
     
-    ploss_bx = None
-    for fol in stable_phase_data_folders:
-        ploss_filepath = fol+'/Power_Loss_Fill_%d_B%d.csv'%(filln, beam)
-        if os.path.isfile(ploss_filepath):
-            ploss_bx = PowerLoss(ploss_filepath)
-            break
-    if ploss_bx is None:
-        raise IOError('File not found, try with --ObsBox mode (fills from 2017 onwards).')
+    if obsbox:
+        ploss_bx = PowerLoss({'filln':filln, 'beam':beam})
+    else:
+        ploss_bx = None
+        for fol in stable_phase_data_folders:
+            ploss_filepath = fol+'/Power_Loss_Fill_%d_B%d.csv'%(filln, beam)
+            if os.path.isfile(ploss_filepath):
+                ploss_bx = PowerLoss(ploss_filepath)
+                break
+        if ploss_bx is None:
+            raise IOError('File not found, try with --ObsBox mode (fills from 2017 onwards).')
             
 
     # Intensity and energy
