@@ -160,7 +160,7 @@ for beam in [1,2]:
     i_bunches = np.where(list_nbunches > 0)[0]
 
     N_bunches = len(i_bunches)
-    figbbb = plt.figure(100+i_fig, figsize=(14, 8))
+    figbbb = plt.figure(100+i_fig, figsize=(14, 10))
     figbbb.patch.set_facecolor('w')
     axbbb_bct = plt.subplot(211, sharex=sp_t)
     axbbb_traces = plt.subplot(212, sharex=axbbb_bct)
@@ -183,6 +183,7 @@ for beam in [1,2]:
     axbbb_bct.grid('on')
     axbbb_traces.grid('on')
     axbbb_bct.set_ylabel('Beam intensity [p]')
+    axbbb_bct.set_xlabel('Time [h]')
     axbbb_traces.set_ylabel('Lost bunch fraction')
     axbbb_traces.set_xlabel('Time [h]')
 

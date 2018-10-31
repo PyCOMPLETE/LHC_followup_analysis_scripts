@@ -118,9 +118,9 @@ pl.close('all')
 sp_ploss = None
 
 # START PLOT
-fig_h = pl.figure(1, figsize=(17,10))
+fig_h = pl.figure(1, figsize=(8*1.6,6*1.3))
 fig_h.patch.set_facecolor('w')
-ms.mystyle()
+ms.mystyle_arial(fontsz=16, dist_tick_lab=5)
 fig_h.suptitle('Fill %d: started on %s'%(filln, tref_string), fontsize=18)
 
 sp_int = pl.subplot2grid((2,3), (0, 0), rowspan=1)
@@ -185,7 +185,7 @@ sp_totploss.set_ylim(-1, None)
 sp_totploss.set_xlim(xlim)
 sp_totploss.grid('on')
 
-fig_h.subplots_adjust(top=0.9,right=0.95, left=0.07, hspace=0.3, wspace=0.45)	
+fig_h.subplots_adjust(top=0.9,right=0.95, left=0.07, hspace=0.41, wspace=0.45)	
 #fig_h.savefig('../for_evian_stable_phase/Stable_phase_%s.png'%(filln), dpi=220)
 
 pl.show()

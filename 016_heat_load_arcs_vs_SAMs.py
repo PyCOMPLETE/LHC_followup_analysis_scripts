@@ -42,7 +42,7 @@ parser.add_argument('--full-varname-in-legend', help='Do not shorten varnames.',
 parser.add_argument('--colormap', help='chose between hsv and rainbow', default='hsv')
 parser.add_argument('--with_press_drop', help='Use pressure drop for recalculated data.', action='store_true')
 parser.add_argument('--ignore-device-blacklist', help='Use pressure drop for recalculated data.', action='store_true')
-parser.add_argument('--devide_heatload_by', help='Devide heat loads by given number (e.g. to normalized to a given length)', 
+parser.add_argument('--devide_heatload_by', help='Devide heat loads by given number (e.g. to normalized to a given length)',
                     type=float, default=1.)
 parser.add_argument('--vs_bunch_inten', help='Produces addisional plot vs bunch intensity', action='store_true')
 
@@ -118,7 +118,7 @@ dict_hl_groups = HL.heat_loads_plot_sets
 if len(args.custom_vars)>0:
     group_names.append('Custom')
     dict_hl_groups['Custom'] = args.custom_vars
-    
+
 
 
 # merge pickles and add info on location
@@ -148,7 +148,7 @@ else:
     fill_dict = {}
     fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_csvs/fill_%d.csv'%filln, verbose=True))
 
-        
+
 
 if use_recalculated:
     print 'Using recalc data'
@@ -157,7 +157,7 @@ if use_recalculated:
         if 'QBS' in kk and '.POSST'in kk:
             fill_dict[kk] = 'Not recalculated'
     fill_dict.update(qf.get_fill_dict(filln, use_dP=use_dP))
-# Handle additional csvs 
+# Handle additional csvs
 for csv in added_csvs:
     fill_dict.update(tm.parse_timber_file(csv), verbose=True)
 
@@ -197,11 +197,11 @@ sp1 = None
 
 
 for ii, group_name in enumerate(group_names):
-    
+
     fig_h = pl.figure(ii, figsize=(8*1.4, 6*1.4))
     figs.append(fig_h)
     fig_h.patch.set_facecolor('w')
-    
+
     sptotint = pl.subplot(3,1,1, sharex=sp1)
     sp1 = sptotint
     spavbl = pl.subplot(3,1,3, sharex=sp1)
@@ -238,14 +238,13 @@ for ii, group_name in enumerate(group_names):
         sptotint.set_ylabel('Total intensity [p+]')
         sptotint.grid('on')
         sptotint.set_ylim(0, None)
-
         if flag_bunch_length and not normtointen:
             spavbl.plot((blength_bx[beam_n].t_stamps-t_ref)/3600., blength_bx[beam_n].avblen/1e-9, '.-', color=colstr[beam_n])
             spavbl.set_ylabel('Bunch length [ns]')
             spavbl.set_ylim(0.8,1.8)
         spavbl.grid('on')
         spavbl.set_xlabel('Time [h]')
-        
+
         # Count number of bunches
         if args.vs_bunch_inten:
             bint = fbct_bx[beam_n].bint
@@ -259,10 +258,10 @@ for ii, group_name in enumerate(group_names):
         string = 'Recalculated data - %s'%({True: 'with_dP', False: 'no_dP'}[args.with_press_drop])
     else:
         string = 'Logged data'
-        
+
     if args.devide_heatload_by!=1.:
         string+=', devided by %.1f'%args.devide_heatload_by
-    
+
     fig_h.suptitle(' Fill. %d started on %s\n%s (%s)'%(filln, tref_string, group_name, string))
     fig_h.canvas.set_window_title(group_name)
 
@@ -282,10 +281,10 @@ for ii, group_name in enumerate(group_names):
                 hl_corr_factors.append(arc_correction_factor_list[jj])
         heatloads.correct_values(hl_corr_factors)
 
-    
+
     if flag_average:
         hl_ts_curr, hl_aver_curr  = heatloads.mean()
-        
+
     tot_model = None
     if plot_model and (group_name in list_groups_compatible_with_imped_sr_arcs):
         hli_calculator  = ihl.HeatLoadCalculatorImpedanceLHCArc()
@@ -293,20 +292,19 @@ for ii, group_name in enumerate(group_names):
         hl_imped_fill = fc.HeatLoad_calculated_fill(fill_dict, hli_calculator, bct_dict=bct_bx, fbct_dict=fbct_bx, blength_dict=blength_bx)
         hl_sr_fill = fc.HeatLoad_calculated_fill(fill_dict, hlsr_calculator, bct_dict=bct_bx, fbct_dict=fbct_bx, blength_dict=blength_bx)
         tot_model = (hl_imped_fill.heat_load_calculated_total+hl_sr_fill.heat_load_calculated_total)*HL.magnet_length[group_name][0]
-        
+
         if plot_model:
             label='Imp.+SR (recalc.)'
             sphlcell.plot((hl_imped_fill.t_stamps-t_ref)/3600,
                 tot_model/args.devide_heatload_by,
                 '--', color='grey', lw=2., label=label, zorder=10)
 
-        
     for jj, kk in enumerate(heatloads.variable_list):
         colorcurr = ms.colorprog(i_prog=jj, Nplots=len(heatloads.variable_list), cm=args.colormap)
-        
+
         if kk in device_blacklist and not args.ignore_device_blacklist:
             continue
-            
+
         if t_zero is not None:
             offset = np.interp(t_ref+t_zero*3600, heatloads.timber_variables[kk].t_stamps, heatloads.timber_variables[kk].values)
         else:
@@ -325,7 +323,7 @@ for ii, group_name in enumerate(group_names):
 
         sphlcell.plot((heatloads.timber_variables[kk].t_stamps-t_ref)/3600, (heatloads.timber_variables[kk].values-offset)/args.devide_heatload_by,
             '-', color=colorcurr, lw=2., label=label)#.split('_QBS')[0])
-            
+
         if normtointen:
             t_curr = heatloads.timber_variables[kk].t_stamps
             hl_curr = heatloads.timber_variables[kk].values
@@ -338,21 +336,21 @@ for ii, group_name in enumerate(group_names):
         if args.vs_bunch_inten:
             t_curr = heatloads.timber_variables[kk].t_stamps
             hl_curr = heatloads.timber_variables[kk].values
-            
+
             if tot_model is not None:
                 hl_plot = hl_curr - np.interp(t_curr, hl_imped_fill.t_stamps, tot_model)
             else:
                 hl_plot = hl_curr
-                
-                
+
+
             bct1_int = np.interp(t_curr, bct_bx[1].t_stamps, bct_bx[1].values)
             bct2_int = np.interp(t_curr, bct_bx[2].t_stamps, bct_bx[2].values)
             bint = (bct1_int+bct2_int)/(n_bunches_bx[1]+n_bunches_bx[2])
-            
+
             mask_beam_high_ene = np.logical_and((bct1_int+bct2_int)>int_cut_norm, t_curr>dict_fill_bmodes[filln]['t_stop_SQUEEZE'])
-            
+
             spbint.plot(bint[mask_beam_high_ene], (hl_plot[mask_beam_high_ene]-offset)/args.devide_heatload_by, '-', color=colorcurr, lw=2., label=label)
-   
+
         #~ kk = 'LHC.QBS_CALCULATED_ARC.TOTAL'
         #~ label='Imp.+SR'
         #~ sphlcell.plot((hl_model.timber_variables[kk].t_stamps-t_ref)/3600., hl_model.timber_variables[kk].values,
@@ -369,13 +367,13 @@ for ii, group_name in enumerate(group_names):
     #~ sphlcell.set_xlabel('Time [h]')
     sphlcell.legend(prop={'size':myfontsz}, bbox_to_anchor=(1.15, 1.0),  loc='upper left')
     sphlcell.grid('on')
-    
+
     if normtointen:
          spavbl.set_ylabel('Normalized heat load [W/p+]')
 
     fig_h.subplots_adjust(right=0.65, wspace=0.35, hspace=.26)
     #~ fig_h.set_size_inches(15., 8.)
-    
+
     if args.vs_bunch_inten:
         spbint.set_xlim(0, 1.5e11)
         spbint.grid('on')

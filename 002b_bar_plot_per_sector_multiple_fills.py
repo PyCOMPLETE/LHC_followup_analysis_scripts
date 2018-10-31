@@ -1,6 +1,6 @@
 import sys, time, os
 sys.path.append("../")
-
+sys.path.append("../LHC_fullRun2_analysis_scripts/")
 import LHCMeasurementTools.TimberManager as tm
 import LHCMeasurementTools.SetOfHomogeneousVariables as shv
 import LHCMeasurementTools.LHC_Heatloads as hl
@@ -21,7 +21,7 @@ import pylab as plt
 
 
 # defaults
-t_offset = None
+t_offset_h = None
 min_hl_scale = None
 max_hl_scale = None
 tagfname = ''
@@ -45,6 +45,8 @@ parser.add_argument('--maxhist', help='Minimum in histogram scales', type=float)
 
 
 parser.add_argument('--at', help="Snapshots in the form: filln:5108!t_h:2.5!t_offs_h:0.05 filln:5108!t_h:3.5!t_offs_h:0.05", nargs='+')
+
+
 
 
 args = parser.parse_args()
@@ -89,7 +91,7 @@ except Exception as err:
     
 
 
-# beuild snaphosts dicts
+# build snapshots dicts
 snapshots = []
 for strin in args.at:
     dd = {}
@@ -127,6 +129,8 @@ for i_snapshot in xrange(N_snapshots):
     filln = snapshots[i_snapshot]['filln']
     t_sample_h = snapshots[i_snapshot]['t_h']
     t_offset_h = snapshots[i_snapshot]['t_offs_h']
+    if args.zeroat is not None:
+        t_offset_h = None
     
     if from_csv:
         fill_file = 'fill_heatload_data_csvs/hl_all_cells_fill_%d.csv'%filln
@@ -156,8 +160,8 @@ for i_snapshot in xrange(N_snapshots):
     intensity_b1, intensity_b2, bl_ave_b1, bl_ave_b2, n_bunches_b1, n_bunches_b2, energy_GeV, hl_imped_sample, hl_sr_sample = cch.extract_and_compute_extra_fill_data(fill_dict, t_ref, t_sample_h, thresh_bint=3e10)
 
     # extract heat load data
-    dict_hl_cell_by_cell = cch.sample_and_sort_cell_by_cell(hid, t_ref=t_ref, t_sample_h=t_sample_h, t_offset_h=t_offset, first_cell=args.first_cell)
-    
+    dict_hl_cell_by_cell = cch.sample_and_sort_cell_by_cell(hid, t_ref=t_ref, t_sample_h=t_sample_h, t_offset_h=t_offset_h, first_cell=args.first_cell)
+        
     snapshots[i_snapshot]['intensity_b1'] = intensity_b1
     snapshots[i_snapshot]['intensity_b2'] = intensity_b2
     snapshots[i_snapshot]['bl_ave_b1'] = bl_ave_b1

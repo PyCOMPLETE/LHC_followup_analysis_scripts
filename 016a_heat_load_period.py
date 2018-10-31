@@ -233,8 +233,8 @@ for i_fill, filln in enumerate(fill_list):
     if plot_all:
         for ii, kk in enumerate(heatloads.variable_list):
 
-            if '13L5' in kk and ('D2' in kk or 'D3' in kk):
-                continue
+            #if '13L5' in kk and ('D2' in kk or 'D3' in kk):
+            #    continue
             colorcurr = ms.colorprog(i_prog=ii, Nplots=len(heatloads.variable_list))
 
             kwplt = {}
