@@ -129,8 +129,6 @@ for i_snapshot in xrange(N_snapshots):
     filln = snapshots[i_snapshot]['filln']
     t_sample_h = snapshots[i_snapshot]['t_h']
     t_offset_h = snapshots[i_snapshot]['t_offs_h']
-    if args.zeroat is not None:
-        t_offset_h = None
     
     if from_csv:
         fill_file = 'fill_heatload_data_csvs/hl_all_cells_fill_%d.csv'%filln
