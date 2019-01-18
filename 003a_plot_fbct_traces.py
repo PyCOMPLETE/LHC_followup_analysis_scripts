@@ -40,7 +40,7 @@ int_thresh = 2e10
 if len(sys.argv)>1:
 
      if np.any(map(lambda s: ('--n_traces'in s), sys.argv)):
-        i_arg = np.where(map(lambda s: ('--n_traces'in s), sys.argv))[0]
+        i_arg = int(np.where(map(lambda s: ('--n_traces'in s), sys.argv))[0])
         arg_temp = sys.argv[i_arg]
         N_traces_set = float(arg_temp.split('=')[-1])
         traces_times = np.linspace(0.1, (t_end-t_ref)/3600., N_traces_set)
@@ -76,13 +76,30 @@ if len(sys.argv)>1:
 
 
      if np.any(map(lambda s: ('--interval'in s), sys.argv)):
-        i_arg = np.where(map(lambda s: ('--interval'in s), sys.argv))[0]
+        i_arg = int(np.where(map(lambda s: ('--interval'in s), sys.argv))[0])
         arg_temp = sys.argv[i_arg]
         t_start_man = float(arg_temp.split('=')[-1].split(',')[0])
         t_end_man = float(arg_temp.split('=')[-1].split(',')[1])
         print 'Interval manually set: %.2fh to %.2fh'%(t_start_man, t_end_man)
         if N_traces_set==None: N_traces_set=30
         traces_times = np.linspace(t_start_man, t_end_man, N_traces_set)
+
+     if np.any(map(lambda s: ('--twotraces'in s), sys.argv)):
+        i_arg = int(np.where(map(lambda s: ('--twotraces'in s), sys.argv))[0])
+        arg_temp = sys.argv[i_arg].split('=')[-1]
+        temp_list = arg_temp.split(':')
+        if len(temp_list) != 4:
+            raise ValueError('twotraces option should be given in the form:\n--twotraces=slot_start:n_slots:t_h:Dt_min')
+        flag_two_traces = True
+        slot_start_2tr = int(temp_list[0])
+        n_slots_2tr = int(temp_list[1])
+        t_h_2tr = float(temp_list[2])
+        Dt_min_2tr = float(temp_list[3])
+     else:
+        flag_two_traces = False
+        
+
+
 
      if '--notrace' in sys.argv:
         traces_times = []
