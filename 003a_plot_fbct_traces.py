@@ -136,6 +136,7 @@ plt.close('all')
 ms.mystyle_arial(fontsz=16, dist_tick_lab=5)
 beam_col = ['b','r']
 fig_list = []
+figures_2traces={}
 for beam in [1,2]:
     fbct = FBCT.FBCT(fill_dict, beam=beam)
     bct = BCT.BCT(fill_dict, beam=beam)
@@ -203,5 +204,30 @@ for beam in [1,2]:
     axbbb_bct.set_xlabel('Time [h]')
     axbbb_traces.set_ylabel('Lost bunch fraction')
     axbbb_traces.set_xlabel('Time [h]')
+    
+    if flag_two_traces:
+        fig2traces = plt.figure(200 + beam)
+        fig2traces.set_facecolor('w')
+        sp2tr = fig2traces.add_subplot(111)
+
+        t_first_trace = t_ref+ t_h_2tr*3600.
+        t_second_trace = t_first_trace + Dt_min_2tr*60
+        inten_first, t_real_first = fbct.nearest_sample(t_first_trace, flag_return_time=True)
+        inten_second, t_real_second = fbct.nearest_sample(t_second_trace, flag_return_time=True)
+        
+        mask_2tr = inten_first[slot_start_2tr : slot_start_2tr + n_slots_2tr] > 1e10
+
+        sp2tr.plot(inten_first[slot_start_2tr : slot_start_2tr + n_slots_2tr] * np.float_(mask_2tr), 'b', linewidth=2)
+        sp2tr.plot(inten_second[slot_start_2tr : slot_start_2tr + n_slots_2tr] * np.float_(mask_2tr), 'r', linewidth=2)
+        sp2tr.set_xlim(0, n_slots_2tr)
+        sp2tr.set_ylabel('Bunch intensity [p]')
+        sp2tr.set_xlabel('Bunch slot')
+        sp2tr.grid(True)
+
+        fig2traces.suptitle('Fill %d: B%d, started on %s\nt_h = %.3f, Dt= %.1f min, slot =%d'%(
+            filln, beam, tref_string, t_h_2tr, Dt_min_2tr, slot_start_2tr))
+        fig2traces.subplots_adjust(top=.84)
+
+        figures_2traces[beam] = fig2traces
 
 plt.show()
