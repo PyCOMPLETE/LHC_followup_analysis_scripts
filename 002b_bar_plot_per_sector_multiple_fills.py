@@ -215,24 +215,6 @@ for i, s in enumerate(hl.sector_list()):
     sptable =  plt.subplot2grid((2,2), (1,1), colspan=1, sharey=spsharehist, sharex=spsharehist)
     
     spshare = ax1_sect
-
-    if N_snapshots==1:
-        if plot_model:
-            if args.legend:
-                label1, label2 = 'Imp', 'SR'
-            else:
-                label1, label2 = None, None
-                
-            hl_imped_t1 = snapshots[i_snapshot]['hl_imped_sample']
-            hl_sr_t1 = snapshots[i_snapshot]['hl_sr_sample']
-
-            ax1_sect.axhspan(ymin=0, ymax=hl_imped_t1/totintnorm, color='grey', alpha=0.5, label=label1)
-            ax1_sect.axhspan(ymin=hl_imped_t1/totintnorm, ymax=(hl_imped_t1+hl_sr_t1)/totintnorm, color='green', alpha=0.5, label=label2)
-            if args.legend:
-                ax1_sect.legend(bbox_to_anchor=(1,1), loc='upper left')
-    else:
-        if plot_model:
-            print('Info: the model line is plotted only when running with a single snapshot')
             
     
     y_list.append([])        
@@ -247,6 +229,24 @@ for i, s in enumerate(hl.sector_list()):
             totintnorm = (snapshots[i_snapshot]['intensity_b1']+snapshots[i_snapshot]['intensity_b2'])
         else:
             totintnorm = 1.
+
+        if N_snapshots==1:
+            if plot_model:
+                if args.legend:
+                    label1, label2 = 'Imp', 'SR'
+                else:
+                    label1, label2 = None, None
+                    
+                hl_imped_t1 = snapshots[i_snapshot]['hl_imped_sample']
+                hl_sr_t1 = snapshots[i_snapshot]['hl_sr_sample']
+    
+                ax1_sect.axhspan(ymin=0, ymax=hl_imped_t1/totintnorm, color='grey', alpha=0.5, label=label1)
+                ax1_sect.axhspan(ymin=hl_imped_t1/totintnorm, ymax=(hl_imped_t1+hl_sr_t1)/totintnorm, color='green', alpha=0.5, label=label2)
+                if args.legend:
+                    ax1_sect.legend(bbox_to_anchor=(1,1), loc='upper left')
+        else:
+            if plot_model:
+                print('Info: the model line is plotted only when running with a single snapshot')
 
         if normtointen:
             hl_cells/= totintnorm
@@ -339,6 +339,9 @@ figviol.set_facecolor('w')
 axviol = plt.subplot2grid((2,3), (0,0), colspan=3)
 maxdistr = np.max(np.array(y_list)[:])
 for i_snapshot, col_snsh, sign_shsh in zip([0,1], ['b', 'r'], [-1., 1.]):
+
+    if i_snapshot >= N_snapshots:
+        continue
 
     # normalize to intensity
     if normtointen:
