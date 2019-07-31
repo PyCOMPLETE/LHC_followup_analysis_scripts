@@ -85,7 +85,7 @@ if len(sys.argv)>1:
             average_repeated_meas = True
 
      if np.any(map(lambda s: ('--interval'in s), sys.argv)):
-        i_arg = np.where(map(lambda s: ('--interval'in s), sys.argv))[0]
+        i_arg = np.where(map(lambda s: ('--interval'in s), sys.argv))[0][0]
         arg_temp = sys.argv[i_arg]
         t_start_man = float(arg_temp.split('=')[-1].split(',')[0])
         t_end_man = float(arg_temp.split('=')[-1].split(',')[1])
