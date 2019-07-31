@@ -605,6 +605,9 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
     #elif filln >= 6544: # changed on Friday 27/04/2018
 	for kk in e_dict.keys():
 		e_dict[kk] = {450:{}, 6500:{}}
+        
+        e_dict['wrong_sigma_corr_units'] = True
+        
         # Beam 1:    
         e_dict['betaf_h'][450][1]       = 205.05
         e_dict['betaf_h'][6500][1]      = 200.0
@@ -663,6 +666,9 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
     elif filln>=6699  and filln <=6749: # changed on 06/06/2018
         for kk in e_dict.keys():
                 e_dict[kk] = {450:{}, 6500:{}}
+        
+        e_dict['wrong_sigma_corr_units'] = True
+        
         # Beam 1:   
         e_dict['betaf_h'][450][1]       = 205.05
         e_dict['betaf_h'][6500][1]      = 200.0
@@ -739,6 +745,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
     elif filln>=6750 and filln <6913: # changed on 06/06/2018
         for kk in e_dict.keys():
                 e_dict[kk] = {450:{}, 6500:{}}
+        e_dict['wrong_sigma_corr_units'] = True
         # Beam 1:   
         e_dict['betaf_h'][450][1]       = 205.05
         e_dict['betaf_h'][6500][1]      = 200.0
@@ -797,6 +804,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
     elif filln>=6913 and filln <=7030: # changed on 08/08/2018
         for kk in e_dict.keys():
                 e_dict[kk] = {450:{}, 6500:{}}
+        e_dict['wrong_sigma_corr_units'] = True
         # Beam 1:   
         e_dict['betaf_h'][450][1]       = 205.05
         e_dict['betaf_h'][6500][1]      = 200.0
@@ -875,6 +883,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
     elif filln>=7031 and filln <=7220 : # changed on 08/08/2018
         for kk in e_dict.keys():
                 e_dict[kk] = {450:{}, 6500:{}}
+        e_dict['wrong_sigma_corr_units'] = True
         # Beam 1:   
         e_dict['betaf_h'][450][1]       = 204.2
         e_dict['betaf_h'][6500][1]      = 201.5
@@ -935,6 +944,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
     #B1 new calibration cannot be applied to previous fills (wrt Fill 7220)
         for kk in e_dict.keys():
                 e_dict[kk] = {450:{}, 6500:{}}
+        e_dict['wrong_sigma_corr_units'] = True
         # Beam 1:   
         e_dict['betaf_h'][450][1]       = 204.2
         e_dict['betaf_h'][6500][1]      = 201.5
@@ -998,6 +1008,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
     elif filln>=7334 and filln <=7426 : # changed on 21/11/2018
         for kk in e_dict.keys():
                 e_dict[kk] = {450:{}, 6500:{}}
+        e_dict['wrong_sigma_corr_units'] = True
         # Beam 1:   
         e_dict['betaf_h'][450][1]       = 204.2
         e_dict['betaf_h'][6500][1]      = 201.5
@@ -1056,6 +1067,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
 
         for kk in e_dict.keys():
                 e_dict[kk] = {450:{}, 6500:{}}
+        e_dict['wrong_sigma_corr_units'] = True
         # Beam 1:   
         e_dict['betaf_h'][450][1]       = 204.2
         e_dict['betaf_h'][6500][1]      = 201.5
@@ -1113,4 +1125,11 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
     else:
         raise ValueError('What?!')
 
+    if 'wrong_sigma_corr_units' in e_dict.keys():
+        if e_dict['wrong_sigma_corr_units']:
+            for plane in ['h', 'v']:
+                for energy in [450, 6500]:
+                    for beam in [1,2]:
+                        e_dict['sigma_corr_'+plane][energy][beam] *= 1e-3
+    
     return(e_dict)
