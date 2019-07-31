@@ -78,7 +78,7 @@ if screen_mode == 'small':
     fontsz_leg = 14
     figsz = (12,9)
 elif screen_mode == 'CCC':
-    fontsz = 15
+    fontsz = 17 
     fontsz_leg = 15
     figsz = (15,9*5/4.)
 
@@ -214,9 +214,9 @@ for i_fill, filln in enumerate(fill_list):
     bct_b1 = BCT.BCT(fill_dict, beam=1)
     bct_b2 = BCT.BCT(fill_dict, beam=2)
     energy = Energy.energy(fill_dict, beam=1, t_start_fill=t_startfill, t_end_fill=t_endfill)
-    ax1.plot(tc(bct_b1.t_stamps), bct_b1.values*1e-14, lw=2, c='b')
-    ax1.plot(tc(bct_b2.t_stamps), bct_b2.values*1e-14, lw=2, c='r')
-    ax11.plot(tc(energy.t_stamps), energy.energy/1e3, c='black', lw=1.5, alpha=0.2) #was alpha=.5
+    lb1 = ax1.plot(tc(bct_b1.t_stamps), bct_b1.values*1e-14, lw=2, c='b', label='Beam 1')
+    lb2 = ax1.plot(tc(bct_b2.t_stamps), bct_b2.values*1e-14, lw=2, c='r', label='Beam 2')
+    lene = ax11.plot(tc(energy.t_stamps), energy.energy/1e3, c='black', lw=1.5, alpha=0.3, label='Energy') #was alpha=.5
 
     heatloads = SetOfHomogeneousNumericVariables(variable_list=hl_varlist, timber_variables=fill_dict)
 
@@ -314,20 +314,23 @@ for i_fill, filln in enumerate(fill_list):
 
     first_fill = False
 
+lns = lb1 + lb2 + lene
+labs = [l.get_label() for l in lns]
+leg1 = ax1.legend(lns, labs, bbox_to_anchor=(1.06, 1.05),  loc='upper left', prop={'size':fontsz_leg})#, frameon=False)
 
 ax1.set_xlim(tc(t_start_unix), tc(t_end_unix))
 ax11.set_ylim(0, 7)
 ax1.set_ylim(0, None)
 ax1.grid('on')
-ax1.set_ylabel('Total intensity\n[10$^{14}$ p$^+$]')
+ax1.set_ylabel('Total intensity [10$^{14}$ p$^+$]')
 ax11.set_ylabel('Energy [TeV]')
 time_conv.set_x_for_plot(fig, ax1)
 
 if normalization_to_length_of is None:
-    ax2.set_ylabel('Heat load\n[W]')
+    ax2.set_ylabel('Heat load [W/half-cell]')
 else:
     ax2.set_ylabel('Heat load\n[W/m]')
-ax2.legend(bbox_to_anchor=(1.06, 1.05),  loc='upper left', prop={'size':fontsz_leg})#, frameon=False)
+leg2 = ax2.legend(bbox_to_anchor=(1.06, 1.05),  loc='upper left', prop={'size':fontsz_leg}, ncol=1)#, frameon=False)
 #ax2.set_ylim(0, None)
 ax2.grid('on')
 
@@ -344,7 +347,7 @@ if mode == 'integrated':
         ax3.set_ylabel('Integrated heat load\n[J/m]')
 elif mode == 'norm_to_intensity':
     if normalization_to_length_of is None:
-        ax3.set_ylabel('Normalized heat load\n[W/p+]')
+        ax3.set_ylabel('Normalized heat load [W/p+]')
     else:
         ax3.set_ylabel('Normalized heat load\n[W/m/p+]')
     try:
