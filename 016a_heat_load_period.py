@@ -16,6 +16,7 @@ import argparse
 import pickle
 from data_folders import data_folder_list
 
+from collections import OrderedDict
 
 try:
     locale.setlocale(locale.LC_TIME, 'en_US')
@@ -214,9 +215,9 @@ for i_fill, filln in enumerate(fill_list):
     bct_b1 = BCT.BCT(fill_dict, beam=1)
     bct_b2 = BCT.BCT(fill_dict, beam=2)
     energy = Energy.energy(fill_dict, beam=1, t_start_fill=t_startfill, t_end_fill=t_endfill)
-    ax1.plot(tc(bct_b1.t_stamps), bct_b1.values*1e-14, lw=2, c='b')
-    ax1.plot(tc(bct_b2.t_stamps), bct_b2.values*1e-14, lw=2, c='r')
-    ax11.plot(tc(energy.t_stamps), energy.energy/1e3, c='black', lw=1.5, alpha=0.2) #was alpha=.5
+    ax1.plot(tc(bct_b1.t_stamps), bct_b1.values*1e-14, lw=2, c='b', label = 'Intensity B1' if i_fill==0 else "")
+    ax1.plot(tc(bct_b2.t_stamps), bct_b2.values*1e-14, lw=2, c='r', label = 'Intensity B2' if i_fill==0 else "")
+    ax11.plot(tc(energy.t_stamps), energy.energy/1e3, c='black', lw=1.5, alpha=0.2,label='Energy' if i_fill==0 else "") #was alpha=.5
 
     heatloads = SetOfHomogeneousNumericVariables(variable_list=hl_varlist, timber_variables=fill_dict)
 
@@ -241,7 +242,7 @@ for i_fill, filln in enumerate(fill_list):
             # # Enhance S12
             # if 'S12' in kk:
             #     kwplt = {'zorder':10}
-            #     colorcurr = 'k'
+            #     colorcurr = tk'
 
 
             # Labels
@@ -322,6 +323,9 @@ ax1.grid('on')
 ax1.set_ylabel('Total intensity\n[10$^{14}$ p$^+$]')
 ax11.set_ylabel('Energy [TeV]')
 time_conv.set_x_for_plot(fig, ax1)
+
+
+ms.comb_legend(ax1,ax11, bbox_to_anchor=(1.06, 1.05),  loc='upper left', prop={'size':fontsz_leg})
 
 if normalization_to_length_of is None:
     ax2.set_ylabel('Heat load\n[W]')

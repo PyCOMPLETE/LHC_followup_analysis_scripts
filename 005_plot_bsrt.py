@@ -48,52 +48,59 @@ t_fill_len = t_end_fill - t_start_fill
 t_ref = t_start_fill
 n_traces = 20
 
-
+plotave = False
+plotaveonly = False
 
 if len(sys.argv)>1:
 
-     if np.any(map(lambda s: ('--n_traces'in s), sys.argv)):
-        i_arg = np.where(map(lambda s: ('--n_traces'in s), sys.argv))[0]
-        arg_temp = sys.argv[i_arg]
-        n_traces = float(arg_temp.split('=')[-1])
+    if np.any(map(lambda s: ('--n_traces'in s), sys.argv)):
+       i_arg = np.where(map(lambda s: ('--n_traces'in s), sys.argv))[0]
+       arg_temp = sys.argv[i_arg]
+       n_traces = float(arg_temp.split('=')[-1])
 
-        list_scan_times = np.linspace((t_start_fill-t_ref)/3600., (t_end_fill-t_ref)/3600., n_traces)
-         
-     if '--injection' in sys.argv:
-                print 'Scans in the INJPHYS-PRERAMP beam modes'
-                t_start_INJPHYS = dict_fill_bmodes[filln]['t_start_INJPHYS']
-                t_start_RAMP = dict_fill_bmodes[filln]['t_start_RAMP']
-                list_scan_times = np.linspace((t_start_INJPHYS-t_ref)/3600., (t_start_RAMP-t_ref)/3600., n_traces)
+       list_scan_times = np.linspace((t_start_fill-t_ref)/3600., (t_end_fill-t_ref)/3600., n_traces)
+        
+    if '--injection' in sys.argv:
+               print 'Scans in the INJPHYS-PRERAMP beam modes'
+               t_start_INJPHYS = dict_fill_bmodes[filln]['t_start_INJPHYS']
+               t_start_RAMP = dict_fill_bmodes[filln]['t_start_RAMP']
+               list_scan_times = np.linspace((t_start_INJPHYS-t_ref)/3600., (t_start_RAMP-t_ref)/3600., n_traces)
 
 
-     if '--highenergy' in sys.argv:
-                print 'Scans in the FLATTOP-STABLE beam modes'
-                t_start_FLATTOP = dict_fill_bmodes[filln]['t_start_FLATTOP']
-                t_start_STABLE = dict_fill_bmodes[filln]['t_start_STABLE']
-                list_scan_times = np.linspace((t_start_FLATTOP-t_ref)/3600., (t_start_STABLE-t_ref)/3600.+0.5, n_traces)
+    if '--highenergy' in sys.argv:
+               print 'Scans in the FLATTOP-STABLE beam modes'
+               t_start_FLATTOP = dict_fill_bmodes[filln]['t_start_FLATTOP']
+               t_start_STABLE = dict_fill_bmodes[filln]['t_start_STABLE']
+               list_scan_times = np.linspace((t_start_FLATTOP-t_ref)/3600., (t_start_STABLE-t_ref)/3600.+0.5, n_traces)
 
-     if '--stablebeams' in sys.argv:
-                print 'Scans in the STABLE BEAMS'
-                t_start_STABLE = dict_fill_bmodes[filln]['t_start_STABLE']
-                t_end_STABLE = dict_fill_bmodes[filln]['t_stop_STABLE']
-                list_scan_times = np.linspace((t_start_STABLE-t_ref)/3600., (t_end_STABLE-t_ref)/3600.+0.5, n_traces)
+    if '--stablebeams' in sys.argv:
+               print 'Scans in the STABLE BEAMS'
+               t_start_STABLE = dict_fill_bmodes[filln]['t_start_STABLE']
+               t_end_STABLE = dict_fill_bmodes[filln]['t_stop_STABLE']
+               list_scan_times = np.linspace((t_start_STABLE-t_ref)/3600., (t_end_STABLE-t_ref)/3600.+0.5, n_traces)
 
-     if '--sigma' in sys.argv:
-                plot_emittance=False
-                
-     if '--avgrep' in sys.argv:
-            average_repeated_meas = True
+    if '--sigma' in sys.argv:
+               plot_emittance=False
+               
+    if '--avgrep' in sys.argv:
+           average_repeated_meas = True
 
-     if np.any(map(lambda s: ('--interval'in s), sys.argv)):
-        i_arg = np.where(map(lambda s: ('--interval'in s), sys.argv))[0][0]
-        arg_temp = sys.argv[i_arg]
-        t_start_man = float(arg_temp.split('=')[-1].split(',')[0])
-        t_end_man = float(arg_temp.split('=')[-1].split(',')[1])
-        print 'Interval manually set: %.2fh to %.2fh'%(t_start_man, t_end_man)
-        list_scan_times = np.linspace(t_start_man, t_end_man, n_traces)
+    if np.any(map(lambda s: ('--interval'in s), sys.argv)):
+       i_arg = np.where(map(lambda s: ('--interval'in s), sys.argv))[0][0]
+       arg_temp = sys.argv[i_arg]
+       t_start_man = float(arg_temp.split('=')[-1].split(',')[0])
+       t_end_man = float(arg_temp.split('=')[-1].split(',')[1])
+       print 'Interval manually set: %.2fh to %.2fh'%(t_start_man, t_end_man)
+       list_scan_times = np.linspace(t_start_man, t_end_man, n_traces)
 
-     if '--notrace' in sys.argv:
-        list_scan_times = []
+    if '--notrace' in sys.argv:
+       list_scan_times = []
+
+    if '--plotave' in sys.argv:
+        plotave = True
+
+    if '--plotaveonly' in sys.argv:
+        plotaveonly = True
 
 
 fill_dict = {}
@@ -182,24 +189,41 @@ for beam in [1,2]:
                         print 'Stop plotting! Got:'
                         print err
                         continue
-
-        if plot_emittance:
-            sp_sigma_h.plot(scan.bunch_n, scan.norm_emit_h, '.', color=colorcurr)
-            sp_sigma_v.plot(scan.bunch_n, scan.norm_emit_v, '.', color=colorcurr)
-
-        else:
-            sp_sigma_h.plot(scan.bunch_n, scan.sigma_h, '.', color=colorcurr)
-            sp_sigma_v.plot(scan.bunch_n, scan.sigma_v, '.', color=colorcurr)
-
         
+        if not plotaveonly:
+            if plot_emittance:
+                sp_sigma_h.plot(scan.bunch_n, scan.norm_emit_h, '.', color=colorcurr)
+                sp_sigma_v.plot(scan.bunch_n, scan.norm_emit_v, '.', color=colorcurr)
+
+            else:
+                sp_sigma_h.plot(scan.bunch_n, scan.sigma_h, '.', color=colorcurr)
+                sp_sigma_v.plot(scan.bunch_n, scan.sigma_v, '.', color=colorcurr)
+
         
         sp_bunch.axvspan((scan.t_start - t_ref)/3600., (scan.t_stop - t_ref)/3600., facecolor=colorcurr, alpha=0.6, linewidth=1, edgecolor=colorcurr)
         sp_int.axvspan((scan.t_start - t_ref)/3600., (scan.t_stop - t_ref)/3600., facecolor=colorcurr, alpha=0.6, linewidth=1, edgecolor=colorcurr)
         sp_bunch.grid('on')
 
-        #sp_bunch.axvline((scan.t_start - t_ref)/3600., color=colorcurr, alpha=0.99)
+        #sp_bunch.axvline((scan.t_start - t_ref)/3600., color=colorcurr, alpha=0.99):w
         #sp_int.axvline((scan.t_start - t_ref)/3600., color=colorcurr, alpha=0.99)
 
+    if plotave or plotaveonly:
+        if not plot_emittance:
+            raise ValueError('Only average emittances can be plotted')
+        
+        dict_bunches = bsrt.get_bbb_emit_evolution()[0]
+        blist = sorted(dict_bunches.keys())
+        ave_h = []
+        ave_v = []
+        for i_bun in blist:
+            dbunch = dict_bunches[i_bun]
+            tmask = np.logical_and(dbunch['t_stamp'] <= list_scan_times[-1]*3600. + t_ref, dbunch['t_stamp'] >= list_scan_times[0]*3600. + t_ref)
+            ave_h.append(np.mean(dbunch['norm_emit_h'][tmask]))
+            ave_v.append(np.mean(dbunch['norm_emit_v'][tmask]))
+        sp_sigma_h.plot(blist, ave_h, '.k')
+        sp_sigma_v.plot(blist, ave_v, '.k')
+
+    
     sp_sigma_h.set_xlim(0, 3500)
     sp_sigma_v.set_xlim(0, 3500)
     #sp_sigma_h.set_ylim(0, 10)
