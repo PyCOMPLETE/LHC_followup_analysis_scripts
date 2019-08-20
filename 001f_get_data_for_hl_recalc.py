@@ -8,7 +8,11 @@ import LHCMeasurementTools.lhc_log_db_query as lldb
 from LHCMeasurementTools.SetOfHomogeneousVariables import SetOfHomogeneousNumericVariables
 import LHCMeasurementTools.myfilemanager as mfm
 
-import GasFlowHLCalculator.h5_storage as h5_storage
+from GasFlowHLCalculator.h5_storage import H5_storage
+
+import GasFlowHLCalculator
+
+h5_storage = H5_storage(h5_dir = '/eos/user/l/lhcecld/heatload_data_storage/raw_data')
 
 # Config
 dt_seconds = 60
@@ -19,7 +23,7 @@ blacklist.append(5488) # 40 hour long fill, also exceeds memory
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-r', help='reversed', action='store_true')
-parser.add_argument('--year', choices=[2012, 2015, 2016, 2017, 2018], type=int, default=2018)
+parser.add_argument('--year', choices=[2012, 2015, 2016, 2017, 2018, 2019], type=int, default=2019)
 
 args = parser.parse_args()
 year = args.year
@@ -28,7 +32,9 @@ year = args.year
 h5_dir_0 = h5_storage.data_dir
 
 # [For all cells, for 3 special cells]
-variable_files = ['./GasFlowHLCalculator/variable_list_complete.txt', './GasFlowHLCalculator/variable_list_special.txt']
+gfolder = '/'.join(GasFlowHLCalculator.__file__.split('/')[:-1])
+variable_files = [gfolder+'/variable_list_complete.txt',
+	gfolder+'/variable_list_special.txt']
 h5_dirs = [h5_dir_0, h5_dir_0 + 'special_cells/']
 file_names = ['cryo_data_fill', 'special_data_fill']
 temp_filepaths = ['./tmp/' + f for f in file_names]
@@ -45,6 +51,8 @@ elif year == 2017:
     fills_pkl_name = '/afs/cern.ch/project/spsecloud/LHC_2017_operation/LHC_2017_operation/fills_and_bmodes.pkl'
 elif year == 2018:
     fills_pkl_name = '/afs/cern.ch/work/l/lhcscrub/LHC_2018_followup/fills_and_bmodes.pkl'
+elif year == 2019:
+    fills_pkl_name = '/afs/cern.ch/work/l/lhcecld/LHC_followup_download_scripts/fills_and_bmodes.pkl'
 else:
     raise ValueError('Invalid year')
 
