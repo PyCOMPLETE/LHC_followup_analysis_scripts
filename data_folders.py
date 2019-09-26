@@ -9,9 +9,7 @@
 
 
 data_folder_list = [
-'/afs/cern.ch/project/spsecloud/LHC_2012_selected_periods/',
-'/afs/cern.ch/project/spsecloud/LHC_2015_entire_run/',
-'/afs/cern.ch/project/spsecloud/LHC_2016_25ns/LHC_2016_25ns_beforeTS1/',
-'/afs/cern.ch/project/spsecloud/LHC_2017_operation/LHC_2017_operation',
-'/afs/cern.ch/work/l/lhcscrub/LHC_2018_followup/' 
+'/afs/cern.ch/work/l/lhcecld/LHC_followup_download_scripts'
 ]
+
+recalc_h5_folder = '/eos/user/l/lhcecld/heatload_data_storage/'
