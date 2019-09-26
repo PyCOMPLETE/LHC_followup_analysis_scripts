@@ -21,7 +21,9 @@ import HeatLoadCalculators.synchrotron_radiation_heatload as srhl
 import HeatLoadCalculators.FillCalculator as fc
 
 import GasFlowHLCalculator.qbs_fill as qf
-from data_folders import data_folder_list
+from GasFlowHLCalculator.h5_storage import H5_storage
+
+from data_folders import data_folder_list, recalc_h5_folder
 
 from blacklists import device_blacklist
 
@@ -144,9 +146,10 @@ if os.path.isdir(data_folder_fill+'/fill_basic_data_csvs'):
     if not use_recalculated:
         fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_heatload_data_csvs/heatloads_fill_%d.csv'%filln, verbose=False))
 else:
-    # 2015 structure
-    fill_dict = {}
-    fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_csvs/fill_%d.csv'%filln, verbose=True))
+    raise ValueError('This mode has been discontinued!')
+    # # 2015 structure
+    # fill_dict = {}
+    # fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_csvs/fill_%d.csv'%filln, verbose=True))
 
 
 
@@ -156,7 +159,9 @@ if use_recalculated:
     for kk in fill_dict.keys():
         if 'QBS' in kk and '.POSST'in kk:
             fill_dict[kk] = 'Not recalculated'
-    fill_dict.update(qf.get_fill_dict(filln, use_dP=use_dP))
+    fill_dict.update(qf.get_fill_dict(filln,
+        h5_storage=H5_storage(recalc_h5_folder),
+        use_dP=use_dP))
 # Handle additional csvs
 for csv in added_csvs:
     fill_dict.update(tm.parse_timber_file(csv), verbose=True)
