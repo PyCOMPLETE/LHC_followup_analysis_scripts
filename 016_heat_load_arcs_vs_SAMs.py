@@ -209,7 +209,8 @@ for ii, group_name in enumerate(group_names):
 
     sptotint = pl.subplot(3,1,1, sharex=sp1)
     sp1 = sptotint
-    spavbl = pl.subplot(3,1,3, sharex=sp1)
+    if flag_bunch_length:
+        spavbl = pl.subplot(3,1,3, sharex=sp1)
     sphlcell = pl.subplot(3,1,2, sharex=sp1)
     spenergy = sptotint.twinx()
 
@@ -247,8 +248,13 @@ for ii, group_name in enumerate(group_names):
             spavbl.plot((blength_bx[beam_n].t_stamps-t_ref)/3600., blength_bx[beam_n].avblen/1e-9, '.-', color=colstr[beam_n])
             spavbl.set_ylabel('Bunch length [ns]')
             spavbl.set_ylim(0.8,1.8)
-        spavbl.grid('on')
+        if flag_bunch_length:
+            spavbl.grid('on')
+
+    if flag_bunch_length:
         spavbl.set_xlabel('Time [h]')
+    else:
+        sphlcell.set_xlabel('Time [h]')
 
         # Count number of bunches
         if args.vs_bunch_inten:
