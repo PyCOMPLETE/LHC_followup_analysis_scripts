@@ -14,9 +14,12 @@ from LHCMeasurementTools.SetOfHomogeneousVariables import SetOfHomogeneousNumeri
 from LHCMeasurementTools.LHC_Fills import Fills_Info
 import argparse
 import pickle
-from data_folders import data_folder_list
+from data_folders import data_folder_list, recalc_h5_folder
 
 from collections import OrderedDict
+
+import GasFlowHLCalculator.qbs_fill as qf
+from GasFlowHLCalculator.h5_storage import H5_storage
 
 try:
     locale.setlocale(locale.LC_TIME, 'en_US')
@@ -147,8 +150,9 @@ if zero_at is not None:
         fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_heatload_data_csvs/heatloads_fill_%d.csv'%filln_offset, verbose=False))
 
     if args.use_recalc:
-        import GasFlowHLCalculator.qbs_fill as qf
-        fill_dict.update(qf.get_fill_dict(filln_offset))
+        fill_dict.update(qf.get_fill_dict(filln_offset,
+             h5_storage=H5_storage(recalc_h5_folder),
+             use_dP=True))
 
 
     dict_offsets={}
@@ -194,14 +198,15 @@ for i_fill, filln in enumerate(fill_list):
         fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_basic_data_csvs/basic_data_fill_%d.csv'%filln, verbose=False))
         fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_heatload_data_csvs/heatloads_fill_%d.csv'%filln, verbose=False))
     except Exception as err:
-    	print 'Skipped! Got:'
-    	print err
-    	continue
+        print 'Skipped! Got:'
+        print err
+        continue
 
     if args.use_recalc:
-        import GasFlowHLCalculator.qbs_fill as qf
         try:
-            fill_dict.update(qf.get_fill_dict(filln))
+            fill_dict.update(qf.get_fill_dict(filln,
+                h5_storage=H5_storage(recalc_h5_folder),
+                use_dP=True))
         except ValueError:
             'Skipped due to ValueError'
 
@@ -209,7 +214,7 @@ for i_fill, filln in enumerate(fill_list):
         try:
             fill_dict.update(tm.timber_variables_from_h5(data_folder_fill+'/heatloads_fill_h5s/imp_and_SR_fill_%i.h5' % filln))
         except IOError:
-            print "model datafile not found" 
+            print "model datafile not found"
 
 
     bct_b1 = BCT.BCT(fill_dict, beam=1)
