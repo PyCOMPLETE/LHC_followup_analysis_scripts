@@ -7,9 +7,10 @@ import LHCMeasurementTools.LHC_Heatloads as hl
 import LHCMeasurementTools.mystyle as ms
 import scipy.stats as stats
 
-from data_folders import data_folder_list
+from data_folders import data_folder_list, recalc_h5_folder
 
 import GasFlowHLCalculator.qbs_fill as qf
+from GasFlowHLCalculator.h5_storage import H5_storage
 
 import cell_by_cell_plot_helpers as cch
 
@@ -134,7 +135,7 @@ for i_snapshot in xrange(N_snapshots):
         fill_file = 'fill_heatload_data_csvs/hl_all_cells_fill_%d.csv'%filln
         hid = tm.parse_timber_file(fill_file, verbose=args.v)
     else:
-        hid = qf.get_fill_dict(filln)
+        hid = qf.get_fill_dict(filln, h5_storage=H5_storage(recalc_h5_folder))
 
     # get location of current data
     data_folder_fill = dict_fill_bmodes[filln]['data_folder']
