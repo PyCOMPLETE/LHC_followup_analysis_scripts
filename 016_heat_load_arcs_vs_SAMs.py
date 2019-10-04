@@ -245,7 +245,8 @@ for ii, group_name in enumerate(group_names):
         sptotint.grid('on')
         sptotint.set_ylim(0, None)
         if flag_bunch_length and not normtointen:
-            spavbl.plot((blength_bx[beam_n].t_stamps-t_ref)/3600., blength_bx[beam_n].avblen/1e-9, '.-', color=colstr[beam_n])
+            spavbl.plot((blength_bx[beam_n].t_stamps-t_ref)/3600., blength_bx[beam_n].avblen/1e-9, '-',
+                    linewidth=2, color=colstr[beam_n])
             spavbl.set_ylabel('Bunch length [ns]')
             spavbl.set_ylim(0.8,1.8)
         if flag_bunch_length:
@@ -276,8 +277,11 @@ for ii, group_name in enumerate(group_names):
     fig_h.suptitle(' Fill. %d started on %s\n%s (%s)'%(filln, tref_string, group_name, string))
     fig_h.canvas.set_window_title(group_name)
 
-    hl_var_names = dict_hl_groups[group_name][:]
-    hl_var_names_copy = dict_hl_groups[group_name][:]
+    hl_var_names = []
+    for gg in group_name.split('+'):
+        hl_var_names += dict_hl_groups[gg][:]
+
+    hl_var_names_copy = hl_var_names[:]
     for varname in hl_var_names_copy:
         if varname in blacklist:
             hl_var_names.remove(varname)
