@@ -31,12 +31,12 @@ tagfname = ''
 
 
 # parse arguments
-parser = argparse.ArgumentParser(epilog='Example: 002c_v2_bar_plot_per_sector_multiple_fills_anyzero_no_impsr.py --at filln:6961!t_h:2.2!t_offs_h:0.05 filln:6243!t_h:2.5!t_offs_h:0.2 filln:7366!t_h:3.3!t_offs_h:1.0 --no_imp_SR --normtoint --max-hl-scale 5e-13 -o')
+parser = argparse.ArgumentParser(epilog='Example: 002c_v2_bar_plot_per_sector_multiple_fills_anyzero_no_impsr.py --at filln:6961!t_h:2.2!t_offs_h:0.05 filln:6243!t_h:2.5!t_offs_h:0.2 filln:7366!t_h:3.3!t_offs_h:1.0 --no_imp_SR --max-hl-scale 150')
 parser.add_argument('-o', help='Save plots on disk.', action='store_true')
 parser.add_argument('--savein', help='Specify folder to save the output', default='cell_by_cell_plots')
 parser.add_argument('--fromcsv', help='Load heatloads from csvs. By default, use recalculated.', action='store_true')
-parser.add_argument('--min-hl-scale', help='Minimum of plot.', type=float)
-parser.add_argument('--max-hl-scale', help='Maximum of plot.', type=float)
+parser.add_argument('--min_hl_scale', help='Minimum of plot.', type=float)
+parser.add_argument('--max_hl_scale', help='Maximum of plot.', type=float)
 parser.add_argument('--no-plot-model', help='Plot imp. SR contribution to heat loads.', action='store_true')
 parser.add_argument('--tag', help='Tag of plot windows.', default='')
 parser.add_argument('-v', help='Verbose.', action='store_true')
@@ -299,9 +299,9 @@ for i, s in enumerate(hl.sector_list()):
             color=colorlist[i_snapshot], alpha=.5)
 
         if normtointen:
-            ax1_sect.set_ylabel('Norm. heat load [W/hc/p+]')
+            ax1_sect.set_ylabel('Norm. heat load [W/half-cell/p+]')
         else:
-            ax1_sect.set_ylabel('Heat load [W/hc]')
+            ax1_sect.set_ylabel('Heat load [W/half-cell]')
 
 
         ax1_sect.set_ylim(min_hl_scale, max_hl_scale)
@@ -322,9 +322,9 @@ for i, s in enumerate(hl.sector_list()):
         axhist.bar(left=binedges[:-1], width=np.diff(binedges), height=normhist, alpha=0.5, color=colorlist[i_snapshot], edgecolor='none')
 
         if normtointen:
-            axhist.set_xlabel('Norm. heat load [W/hc/p+]')
+            axhist.set_xlabel('Norm. heat load [W/half-cell/p+]')
         else:
-            axhist.set_xlabel('Heat load [W/hc]')
+            axhist.set_xlabel('Heat load [W/half-cell]')
         axhist.set_ylabel('Normalized distribution')
 
         import statsmodels.api as sm
@@ -401,9 +401,9 @@ axviol.set_xticks(2*(np.arange(9)+1))
 axviol.set_xticklabels(['Arc %d'%s for s in hl.sector_list()]+['Impedance\n+Synch. rad.'])
 
 if normtointen:
-    axviol.set_ylabel('Norm. heat load [W/hc/p+]')
+    axviol.set_ylabel('Norm. heat load [W/halkf-cell/p+]')
 else:
-    axviol.set_ylabel('Heat load [W/hc]')
+    axviol.set_ylabel('Heat load [W/half-cell]')
 
 #axviol.set_ylim(min_hl_scale, max_hl_scale)
 axviol.set_ylim(-1e-13,3e-13)
@@ -464,9 +464,9 @@ axviol2.set_ylim(-0.1e-13,3e-13)
 axviol2.set_ylim(0,150)
 
 if normtointen:
-    axviol2.set_ylabel('Norm. heat load [W/hc/p+]')
+    axviol2.set_ylabel('Norm. heat load [W/half-cell/p+]')
 else:
-    axviol2.set_ylabel('Heat load [W/hc]')
+    axviol2.set_ylabel('Heat load [W/half-cell]')
 
 
 to_table = []
