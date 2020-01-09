@@ -401,6 +401,40 @@ table.set_fontsize(myfontsz-1)
 figviol.suptitle('%s'%({False:'recalc. values', True:'DB values'}[from_csv]))
 
 
+# Polar plot
+list_figpol = []
+for i_sn in range(N_snapshots):
+    figpol = plt.figure(2000+i_sn, figsize=(6.4*1.8, 4.8*1.8))
+    figpol.set_facecolor('w')
+    axpol = figpol.add_subplot(111, projection='polar')
+
+    # I concatenate the heat loads taking into account that 
+    # the polar plot starts from the first quadrant and moves counterclockwise
+    all_hl = np.concatenate([snapshots[i_sn]['dict_hl_cell_by_cell'][ss]['heat_loads'][::-1]
+                                for ss in [67, 56, 45, 34, 23, 12, 81, 78] ])
+    all_hl[all_hl>max_hl_scale] = max_hl_scale
+    all_hl[all_hl<0] = np.nan
+    thetapol = np.linspace(0, 2*np.pi, len(all_hl))
+    axpol.plot(thetapol, all_hl, color=colorlist[i_sn],
+        lw=1.5, label='Fill %d'%snapshots[i_sn]['filln'])
+
+    axpol.set_rmin(0.)
+    if max_hl_scale is not None:
+        axpol.set_rmax(max_hl_scale)
+        axpol.set_rticks(np.arange(30, max_hl_scale+1, 30))
+    axpol.grid(linestyle='-', color='grey', alpha=.5)
+    # axpol.set_rlabel_position(-22.5)
+
+    axpol.set_xticks(np.arange(0, 2*np.pi-0.1, np.pi/4))
+    axpol.set_xticklabels(['P%d'%ip for ip in range(1, 9)])
+
+    # axpol.plot(thetapol, all_hl*0+90/2., color='darkseagreen', linestyle='--', lw=1.5)
+    # axpol.plot(thetapol, all_hl*0+160/2., color='darkgreen', linestyle='--', lw=1.5)
+
+    axpol.legend(frameon=False)
+
+    list_figpol.append(figpol)
+
 if args.o:
 
     str_file = 'multiple_'
