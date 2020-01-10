@@ -426,7 +426,7 @@ for i_sn in range(N_snapshots):
     # axpol.set_rlabel_position(-22.5)
 
     axpol.set_xticks(np.arange(0, 2*np.pi-0.1, np.pi/4))
-    axpol.set_xticklabels(['P%d'%ip for ip in range(1, 9)])
+    axpol.set_xticklabels(['P%d'%ip for ip in [7, 6, 5, 4, 3, 2, 1, 8, 7]])
 
     # axpol.plot(thetapol, all_hl*0+90/2., color='darkseagreen', linestyle='--', lw=1.5)
     # axpol.plot(thetapol, all_hl*0+160/2., color='darkgreen', linestyle='--', lw=1.5)
