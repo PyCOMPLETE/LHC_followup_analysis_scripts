@@ -21,7 +21,7 @@ plot_emittance = True
 average_repeated_meas = False
 
 if len(sys.argv)>1:
-     print '--> Processing fill {:s}'.format(sys.argv[1])
+     print('--> Processing fill {:s}'.format(sys.argv[1]))
      filln = int(sys.argv[1])
 
 
@@ -53,28 +53,28 @@ plotaveonly = False
 
 if len(sys.argv)>1:
 
-    if np.any(map(lambda s: ('--n_traces'in s), sys.argv)):
-       i_arg = np.where(map(lambda s: ('--n_traces'in s), sys.argv))[0]
+    if np.any([('--n_traces'in s) for s in sys.argv]):
+       i_arg = np.where([('--n_traces'in s) for s in sys.argv])[0]
        arg_temp = sys.argv[i_arg]
        n_traces = float(arg_temp.split('=')[-1])
 
        list_scan_times = np.linspace((t_start_fill-t_ref)/3600., (t_end_fill-t_ref)/3600., n_traces)
         
     if '--injection' in sys.argv:
-               print 'Scans in the INJPHYS-PRERAMP beam modes'
+               print('Scans in the INJPHYS-PRERAMP beam modes')
                t_start_INJPHYS = dict_fill_bmodes[filln]['t_start_INJPHYS']
                t_start_RAMP = dict_fill_bmodes[filln]['t_start_RAMP']
                list_scan_times = np.linspace((t_start_INJPHYS-t_ref)/3600., (t_start_RAMP-t_ref)/3600., n_traces)
 
 
     if '--highenergy' in sys.argv:
-               print 'Scans in the FLATTOP-STABLE beam modes'
+               print('Scans in the FLATTOP-STABLE beam modes')
                t_start_FLATTOP = dict_fill_bmodes[filln]['t_start_FLATTOP']
                t_start_STABLE = dict_fill_bmodes[filln]['t_start_STABLE']
                list_scan_times = np.linspace((t_start_FLATTOP-t_ref)/3600., (t_start_STABLE-t_ref)/3600.+0.5, n_traces)
 
     if '--stablebeams' in sys.argv:
-               print 'Scans in the STABLE BEAMS'
+               print('Scans in the STABLE BEAMS')
                t_start_STABLE = dict_fill_bmodes[filln]['t_start_STABLE']
                t_end_STABLE = dict_fill_bmodes[filln]['t_stop_STABLE']
                list_scan_times = np.linspace((t_start_STABLE-t_ref)/3600., (t_end_STABLE-t_ref)/3600.+0.5, n_traces)
@@ -85,12 +85,12 @@ if len(sys.argv)>1:
     if '--avgrep' in sys.argv:
            average_repeated_meas = True
 
-    if np.any(map(lambda s: ('--interval'in s), sys.argv)):
-       i_arg = np.where(map(lambda s: ('--interval'in s), sys.argv))[0][0]
+    if np.any([('--interval'in s) for s in sys.argv]):
+       i_arg = np.where([('--interval'in s) for s in sys.argv])[0][0]
        arg_temp = sys.argv[i_arg]
        t_start_man = float(arg_temp.split('=')[-1].split(',')[0])
        t_end_man = float(arg_temp.split('=')[-1].split(',')[1])
-       print 'Interval manually set: %.2fh to %.2fh'%(t_start_man, t_end_man)
+       print('Interval manually set: %.2fh to %.2fh'%(t_start_man, t_end_man))
        list_scan_times = np.linspace(t_start_man, t_end_man, n_traces)
 
     if '--notrace' in sys.argv:
@@ -178,7 +178,7 @@ for beam in [1,2]:
     spemit = sp_sigma_h
     sp_sigma_v = pl.subplot2grid((2,3), (1, 1), rowspan=1, colspan=2, sharex=sp_sigma_h, sharey=spemit)
 
-    for ii in xrange(N_scans):
+    for ii in range(N_scans):
         colorcurr = hsv_to_rgb(float(ii)/float(N_scans), 0.9, 1.)
         colorcurr = [pl.cm.rainbow(k) for k in np.linspace(0, 1, N_scans)][ii]
 
@@ -186,8 +186,8 @@ for beam in [1,2]:
         try:
                         scan = bsrt.find_closest_scan(t_start_requested, scan_thrld)
         except IndexError as err:
-                        print 'Stop plotting! Got:'
-                        print err
+                        print('Stop plotting! Got:')
+                        print(err)
                         continue
         
         if not plotaveonly:

@@ -22,7 +22,7 @@ event = {450:'t_stop_INJPHYS', 6500:'t_start_STABLE'}
 e_dict = {'betaf_h':{}, 'betaf_v':{}, 'gamma':{}, 
       'sigma_corr_h':{}, 'sigma_corr_v':{},
       'rescale_sigma_h':{}, 'rescale_sigma_v':{}, 'scale_h': {}, 'scale_v': {}}
-for kk in e_dict.keys():
+for kk in list(e_dict.keys()):
     e_dict[kk] = {450:{}, 6500:{}}
     
 e_dict['gamma'][450]                = 479.6 
@@ -37,10 +37,10 @@ for ene in [450, 6500]:
 
         data = {}
         data.update(ldb.get([
-                        u'LHC.BSRT.%s.B%d:LSF_H'%(device_name[beam], beam),
-                        u'LHC.BSRT.%s.B%s:LSF_V'%(device_name[beam], beam),
-                        u'LHC.BSRT.%s.B%d:BETA_H'%(device_name[beam], beam),
-                        u'LHC.BSRT.%s.B%s:BETA_V'%(device_name[beam], beam)
+                        'LHC.BSRT.%s.B%d:LSF_H'%(device_name[beam], beam),
+                        'LHC.BSRT.%s.B%s:LSF_V'%(device_name[beam], beam),
+                        'LHC.BSRT.%s.B%d:BETA_H'%(device_name[beam], beam),
+                        'LHC.BSRT.%s.B%s:BETA_V'%(device_name[beam], beam)
                         ],
                         t1=t_ref, t2='last'))
                         
@@ -51,5 +51,5 @@ for ene in [450, 6500]:
         e_dict['rescale_sigma_h'][ene][beam] = 1.
         e_dict['rescale_sigma_v'][ene][beam] = 1.
         
-print e_dict
+print(e_dict)
 

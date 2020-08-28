@@ -7,8 +7,8 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
     if filln is None:
         raise ValueError('A fill number must be provided to select calibration!')
     
-    print('rescale = %s'%rescale )
-    print('period = %s'%period )
+    print(('rescale = %s'%rescale ))
+    print(('period = %s'%period ))
 
     #The "rescaling" is applied for the period between the BSRT calibration fill and the fill where the calibration factors change in timber. 
     #if rescale: #sigma_new=(scale_new/scale_old)*sigma_old
@@ -16,7 +16,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
 
     if filln<5256:        
 
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
             e_dict[kk] = {450:{}, 6500:{}}
 
         # Beam 1:
@@ -66,7 +66,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
         
     elif filln>=5256 and filln<5405:
 
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
             e_dict[kk] = {450:{}, 6500:{}}
 
         # Beam 1:
@@ -164,7 +164,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
 
         
     elif filln>=5405 and filln < 5690: 
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
             e_dict[kk] = {450:{}, 6500:{}}
 
         # Beam 1:
@@ -243,7 +243,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
 
     elif (filln>5690 and filln < 6053): # or filln>6400:        
 
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
             e_dict[kk] = {450:{}, 6500:{}}
 
         ###Beam 1:
@@ -303,7 +303,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
         print('Using calibration A-2017')
 
     elif filln>=6054 and filln < 6309:
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
             e_dict[kk] = {450:{}, 6500:{}}
 
         ###Beam 1:
@@ -364,7 +364,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
 
 	
     elif filln>=6309 and filln < 6420:
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
             e_dict[kk] = {450:{}, 6500:{}}
 
         ###Beam 1:
@@ -484,7 +484,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
         
     #     print('Using calibration D-2017: 2.5TeV Runs!!!')
     elif filln>=6420  and filln <6500:
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
             e_dict[kk] = {450:{}, 6500:{}}
 
         ###Beam 1:
@@ -603,7 +603,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
         #print('Using calibration 2018 A')
     elif filln>=6544  and filln <6698: # changed on 04/06/2018
     #elif filln >= 6544: # changed on Friday 27/04/2018
-	for kk in e_dict.keys():
+	for kk in list(e_dict.keys()):
 		e_dict[kk] = {450:{}, 6500:{}}
         
         e_dict['wrong_sigma_corr_units'] = True
@@ -664,7 +664,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
         print('Using calibration 2018-A')
 
     elif filln>=6699  and filln <=6749: # changed on 06/06/2018
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
                 e_dict[kk] = {450:{}, 6500:{}}
         
         e_dict['wrong_sigma_corr_units'] = True
@@ -743,7 +743,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
         print('Using calibration 2018-B')
 
     elif filln>=6750 and filln <6913: # changed on 06/06/2018
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
                 e_dict[kk] = {450:{}, 6500:{}}
         e_dict['wrong_sigma_corr_units'] = True
         # Beam 1:   
@@ -802,7 +802,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
         print('Using calibration 2018-B')
 
     elif filln>=6913 and filln <=7030: # changed on 08/08/2018
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
                 e_dict[kk] = {450:{}, 6500:{}}
         e_dict['wrong_sigma_corr_units'] = True
         # Beam 1:   
@@ -881,7 +881,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
 
 
     elif filln>=7031 and filln <=7220 : # changed on 08/08/2018
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
                 e_dict[kk] = {450:{}, 6500:{}}
         e_dict['wrong_sigma_corr_units'] = True
         # Beam 1:   
@@ -942,7 +942,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
     elif filln>=7221 and filln <=7333 : # changed on 21/11/2018
     #B2 untouched during recalibration:New calibration data could be retro-applied to correct better previous data
     #B1 new calibration cannot be applied to previous fills (wrt Fill 7220)
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
                 e_dict[kk] = {450:{}, 6500:{}}
         e_dict['wrong_sigma_corr_units'] = True
         # Beam 1:   
@@ -1006,7 +1006,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
 
     #after fill7334 the lsf and scales changed
     elif filln>=7334 and filln <=7426 : # changed on 21/11/2018
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
                 e_dict[kk] = {450:{}, 6500:{}}
         e_dict['wrong_sigma_corr_units'] = True
         # Beam 1:   
@@ -1065,7 +1065,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
 
     elif filln>=7427: # (IE) - Ion period 2018 added on 21.11.2018
 
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
                 e_dict[kk] = {450:{}, 6500:{}}
         e_dict['wrong_sigma_corr_units'] = True
         # Beam 1:   
@@ -1125,7 +1125,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
     else:
         raise ValueError('What?!')
 
-    if 'wrong_sigma_corr_units' in e_dict.keys():
+    if 'wrong_sigma_corr_units' in list(e_dict.keys()):
         if e_dict['wrong_sigma_corr_units']:
             for plane in ['h', 'v']:
                 for energy in [450, 6500]:

@@ -5,7 +5,7 @@ import numpy as np
 
 def swap_even_odd(vect):
     temp_list = []
-    for ii in xrange(len(vect)//2):
+    for ii in range(len(vect)//2):
         temp_list.append(vect[2*ii+1])
         temp_list.append(vect[2*ii])
     return np.array(temp_list)
@@ -26,7 +26,7 @@ def sample_and_sort_cell_by_cell(cell_by_cell_db_dictionary, t_ref, t_sample_h, 
         # Find values at t_sample_h and t2 for each cell.
         val1 = []
         cells = []
-        for cell in hid.keys():
+        for cell in list(hid.keys()):
             if '_D2' in cell or '_D3' in cell or '_D4' in cell or '_Q1' in cell:
                 continue
             if R_part not in cell and L_part not in cell:
@@ -34,7 +34,7 @@ def sample_and_sort_cell_by_cell(cell_by_cell_db_dictionary, t_ref, t_sample_h, 
             try:
                 ind1 = np.argmin(np.abs((np.array(hid[cell].t_stamps) - t_ref)/3600 - t_sample_h))
             except ValueError as e:
-                print('Got Error %s, skipping cell %s' % (e, cell))
+                print(('Got Error %s, skipping cell %s' % (e, cell)))
                 continue
             cellname = cell.split('_')[1]+'_'+cell.split('.POSST')[0][-1]
             if int(cellname[:2])<=first_cell: continue # skip LSS and DS

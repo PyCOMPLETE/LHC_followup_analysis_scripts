@@ -29,7 +29,7 @@ scan_thrld = 70
 average_repeated_meas = False
 
 if len(sys.argv)>1:
-     print '--> Processing fill {:s}'.format(sys.argv[1])
+     print('--> Processing fill {:s}'.format(sys.argv[1]))
      filln = int(sys.argv[1])
 
 ##################
@@ -76,14 +76,14 @@ sp_t = None
 ## Data from LDB ##
 ###################
 
-print 'Get tunes from LDB...'
+print('Get tunes from LDB...')
 data = {}
 data.update(ldb.getScaled(['LHC.BOFSU:TUNE_B%d_H'%beam, 'LHC.BOFSU:TUNE_B%d_V'%beam, 'RPMBB.RR13.ROF.A81B%d:I_MEAS'%beam],
  			t_start_fill, t_end_fill, scaleAlgorithm='AVG', scaleInterval='SECOND',scaleSize='30'))
             
             
             
-print 'Done'
+print('Done')
 
 
 
@@ -106,7 +106,7 @@ resampled_emit_v_bbb = []
 
 t_resampled = np.arange(t_start_fill, t_end_fill, t_step_resample_s)
 
-for i_b in xrange(len(emit_h_bbb)):
+for i_b in range(len(emit_h_bbb)):
     resampled_emit_h_bbb.append(np.interp(t_resampled, t_bbb[i_b], emit_h_bbb[i_b]))
     resampled_emit_v_bbb.append(np.interp(t_resampled, t_bbb[i_b], emit_v_bbb[i_b]))
     

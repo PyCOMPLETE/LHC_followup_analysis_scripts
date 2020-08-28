@@ -154,9 +154,9 @@ else:
 
 
 if use_recalculated:
-    print 'Using recalc data'
+    print('Using recalc data')
     # remove db values from dictionary (for 2015 cases)
-    for kk in fill_dict.keys():
+    for kk in list(fill_dict.keys()):
         if 'QBS' in kk and '.POSST'in kk:
             fill_dict[kk] = 'Not recalculated'
     fill_dict.update(qf.get_fill_dict(filln,

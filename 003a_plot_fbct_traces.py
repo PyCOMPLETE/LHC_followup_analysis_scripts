@@ -22,7 +22,7 @@ for df in data_folder_list:
         dict_fill_bmodes.update(this_dict_fill_bmodes)
 
 if len(sys.argv)>1:
-     print '--> Processing fill {:s}'.format(sys.argv[1])
+     print('--> Processing fill {:s}'.format(sys.argv[1]))
      filln = int(sys.argv[1])
 
 t_ref = dict_fill_bmodes[filln]['t_startfill']
@@ -39,14 +39,14 @@ int_thresh = 2e10
 
 if len(sys.argv)>1:
 
-     if np.any(map(lambda s: ('--n_traces'in s), sys.argv)):
-        i_arg = int(np.where(map(lambda s: ('--n_traces'in s), sys.argv))[0])
+     if np.any([('--n_traces'in s) for s in sys.argv]):
+        i_arg = int(np.where([('--n_traces'in s) for s in sys.argv])[0])
         arg_temp = sys.argv[i_arg]
         N_traces_set = float(arg_temp.split('=')[-1])
         traces_times = np.linspace(0.1, (t_end-t_ref)/3600., N_traces_set)
 
      if '--injection' in sys.argv:
-        print 'Scans in the INJPHYS-PRERAMP beam modes'
+        print('Scans in the INJPHYS-PRERAMP beam modes')
         t_start_INJPHYS = dict_fill_bmodes[filln]['t_start_INJPHYS']
         t_start_RAMP = dict_fill_bmodes[filln]['t_start_RAMP']
         if N_traces_set==None: N_traces_set=30
@@ -54,38 +54,38 @@ if len(sys.argv)>1:
 
 
      if '--highenergy' in sys.argv:
-        print 'Scans in the FLATTOP-STABLE beam modes'
+        print('Scans in the FLATTOP-STABLE beam modes')
         t_start_FLATTOP = dict_fill_bmodes[filln]['t_start_FLATTOP']
         t_start_STABLE = dict_fill_bmodes[filln]['t_start_STABLE']
         if N_traces_set==None: N_traces_set=30
         traces_times = np.linspace((t_start_FLATTOP-t_ref)/3600., (t_start_STABLE-t_ref)/3600.+0.5, N_traces_set)
 
      if '--stablebeams' in sys.argv:
-        print 'Scans in the STABLE BEAMS'
+        print('Scans in the STABLE BEAMS')
         t_start_STABLE = dict_fill_bmodes[filln]['t_start_STABLE']
         t_end_STABLE = dict_fill_bmodes[filln]['t_stop_STABLE']
         if N_traces_set==None: N_traces_set=30
         traces_times = np.linspace((t_start_STABLE-t_ref)/3600., (t_end_STABLE-t_ref)/3600.+0.5, N_traces_set)
 
      if '--ramp' in sys.argv:
-        print 'Scans in the RAMP'
+        print('Scans in the RAMP')
         t_start_RAMP= dict_fill_bmodes[filln]['t_start_RAMP']
         t_end_RAMP = dict_fill_bmodes[filln]['t_stop_RAMP']
         if N_traces_set==None: N_traces_set=10
         traces_times = np.linspace((t_start_RAMP-t_ref)/3600., (t_end_RAMP-t_ref)/3600, N_traces_set)
 
 
-     if np.any(map(lambda s: ('--interval'in s), sys.argv)):
-        i_arg = int(np.where(map(lambda s: ('--interval'in s), sys.argv))[0])
+     if np.any([('--interval'in s) for s in sys.argv]):
+        i_arg = int(np.where([('--interval'in s) for s in sys.argv])[0])
         arg_temp = sys.argv[i_arg]
         t_start_man = float(arg_temp.split('=')[-1].split(',')[0])
         t_end_man = float(arg_temp.split('=')[-1].split(',')[1])
-        print 'Interval manually set: %.2fh to %.2fh'%(t_start_man, t_end_man)
+        print('Interval manually set: %.2fh to %.2fh'%(t_start_man, t_end_man))
         if N_traces_set==None: N_traces_set=30
         traces_times = np.linspace(t_start_man, t_end_man, N_traces_set)
 
-     if np.any(map(lambda s: ('--twotraces'in s), sys.argv)):
-        i_arg = int(np.where(map(lambda s: ('--twotraces'in s), sys.argv))[0])
+     if np.any([('--twotraces'in s) for s in sys.argv]):
+        i_arg = int(np.where([('--twotraces'in s) for s in sys.argv])[0])
         arg_temp = sys.argv[i_arg].split('=')[-1]
         temp_list = arg_temp.split(':')
         if len(temp_list) != 4:
@@ -150,7 +150,7 @@ for beam in [1,2]:
 
 
     ax0.plot((bct.t_stamps-t_ref)/3600., bct.values, color=beam_col[beam-1], lw=2)
-    for i in xrange(0, n_traces):
+    for i in range(0, n_traces):
         t_cut_h = traces_times[i]
         t_curr = t_ref+t_cut_h*3600.
         fbct_curr, t_fbct_curr = fbct.nearest_older_sample(t_curr, flag_return_time=True)

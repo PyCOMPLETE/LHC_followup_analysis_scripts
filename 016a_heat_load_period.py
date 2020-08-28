@@ -1,4 +1,4 @@
-from __future__ import division
+
 import time
 import locale
 import pylab as pl
@@ -24,8 +24,8 @@ from GasFlowHLCalculator.h5_storage import H5_storage
 try:
     locale.setlocale(locale.LC_TIME, 'en_US')
 except Exception as err:
-    print '\nDid not manage to set locale. Got:'
-    print err
+    print('\nDid not manage to set locale. Got:')
+    print(err)
 
 empty_fills = [3888, 4032, 4055]
 device_blacklist = [
@@ -131,7 +131,7 @@ fill_list = fill_info.fills_in_time_window(t_start_unix, t_end_unix)
 
 # find offset to remove
 if zero_at is not None:
-    print 'Evaluating offsets'
+    print('Evaluating offsets')
     if ':' in zero_at:
         t_zero_unix = time.mktime(time.strptime(zero_at, '%d-%m-%Y,%H:%M'))
     else:
@@ -142,9 +142,9 @@ if zero_at is not None:
 
     try:
         fill_dict = tm.timber_variables_from_h5(data_folder_fill+'/heatloads_fill_h5s/heatloads_all_fill_%d.h5'%filln_offset)
-        print 'From h5!'
+        print('From h5!')
     except IOError:
-        print "h5 file not found, using csvs"
+        print("h5 file not found, using csvs")
         fill_dict = {}
         fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_basic_data_csvs/basic_data_fill_%d.csv'%filln_offset, verbose=False))
         fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_heatload_data_csvs/heatloads_fill_%d.csv'%filln_offset, verbose=False))
@@ -179,9 +179,9 @@ first_fill = True
 
 for i_fill, filln in enumerate(fill_list):
 
-    print 'Fill %d, %d/%d'%(filln, i_fill+1, N_fills)
+    print('Fill %d, %d/%d'%(filln, i_fill+1, N_fills))
     if filln in empty_fills:
-        print 'Fill blacklisted!'
+        print('Fill blacklisted!')
         continue
 
     t_startfill = fill_info.dict_fill_bmodes[filln]['t_startfill']
@@ -191,15 +191,15 @@ for i_fill, filln in enumerate(fill_list):
 
     try:
         fill_dict = tm.timber_variables_from_h5(data_folder_fill+'/heatloads_fill_h5s/heatloads_all_fill_%d.h5'%filln)
-        print 'From h5!'
+        print('From h5!')
     except IOError:
-        print "h5 file not found, using csvs"
+        print("h5 file not found, using csvs")
         fill_dict = {}
         fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_basic_data_csvs/basic_data_fill_%d.csv'%filln, verbose=False))
         fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_heatload_data_csvs/heatloads_fill_%d.csv'%filln, verbose=False))
     except Exception as err:
-        print 'Skipped! Got:'
-        print err
+        print('Skipped! Got:')
+        print(err)
         continue
 
     if args.use_recalc:
@@ -214,7 +214,7 @@ for i_fill, filln in enumerate(fill_list):
         try:
             fill_dict.update(tm.timber_variables_from_h5(data_folder_fill+'/heatloads_fill_h5s/imp_and_SR_fill_%i.h5' % filln))
         except IOError:
-            print "model datafile not found"
+            print("model datafile not found")
 
 
     bct_b1 = BCT.BCT(fill_dict, beam=1)
@@ -287,7 +287,7 @@ for i_fill, filln in enumerate(fill_list):
 
         except Exception as err:
             print('Cannot plot model heat loads because')
-            print err
+            print(err)
         else:
             if first_fill:
                 label='Imp.+SR'
