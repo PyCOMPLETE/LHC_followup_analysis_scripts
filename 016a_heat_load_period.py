@@ -18,8 +18,6 @@ from data_folders import data_folder_list, recalc_h5_folder
 
 from collections import OrderedDict
 
-import GasFlowHLCalculator.qbs_fill as qf
-from GasFlowHLCalculator.h5_storage import H5_storage
 
 try:
     locale.setlocale(locale.LC_TIME, 'en_US')
@@ -71,6 +69,10 @@ plot_model = args.plot_model
 mode = args.mode
 zero_at = args.zeroat
 
+if args.use_recalc:
+    import GasFlowHLCalculator.qbs_fill as qf
+    from GasFlowHLCalculator.h5_storage import H5_storage
+
 normalization_to_length_of = args.normlength
 if 'None' in normalization_to_length_of or 'none' in normalization_to_length_of:
     normalization_to_length_of = None
@@ -80,11 +82,11 @@ screen_mode = args.screen
 if screen_mode == 'small':
     fontsz = 14
     fontsz_leg = 14
-    figsz = (12,9)
+    figsz = (6.4*1.9, 4.8*1.5)
 elif screen_mode == 'CCC':
-    fontsz = 15
-    fontsz_leg = 15
-    figsz = (15,9*5/4.)
+    fontsz = 14
+    fontsz_leg = 14
+    figsz = (6.4*1.9, 4.8*1.5)
 
 t_plot_tick_h = args.hourtickspac
 if t_plot_tick_h != 'week':
@@ -144,10 +146,14 @@ if zero_at is not None:
         fill_dict = tm.timber_variables_from_h5(data_folder_fill+'/heatloads_fill_h5s/heatloads_all_fill_%d.h5'%filln_offset)
         print('From h5!')
     except IOError:
-        print("h5 file not found, using csvs")
+        print("h5 file not found, using h5s :-P")
         fill_dict = {}
-        fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_basic_data_csvs/basic_data_fill_%d.csv'%filln_offset, verbose=False))
-        fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_heatload_data_csvs/heatloads_fill_%d.csv'%filln_offset, verbose=False))
+        fill_dict.update(tm.CalsVariables_from_h5(
+            data_folder_fill + ('/fill_basic_data_h5s/'
+                'basic_data_fill_%d.h5'%filln_offset)))
+        fill_dict.update(tm.CalsVariables_from_h5(
+            data_folder_fill + ('/fill_heatload_data_h5s/'
+                'heatloads_fill_%d.h5'%filln_offset)))
 
     if args.use_recalc:
         fill_dict.update(qf.get_fill_dict(filln_offset,
@@ -193,10 +199,13 @@ for i_fill, filln in enumerate(fill_list):
         fill_dict = tm.timber_variables_from_h5(data_folder_fill+'/heatloads_fill_h5s/heatloads_all_fill_%d.h5'%filln)
         print('From h5!')
     except IOError:
-        print("h5 file not found, using csvs")
+        print("h5 file not found, using h5s :-P")
         fill_dict = {}
-        fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_basic_data_csvs/basic_data_fill_%d.csv'%filln, verbose=False))
-        fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_heatload_data_csvs/heatloads_fill_%d.csv'%filln, verbose=False))
+        fill_dict.update(tm.CalsVariables_from_h5(
+            data_folder_fill + ('/fill_basic_data_h5s/'
+                'basic_data_fill_%d.h5'%filln)))
+        fill_dict.update(tm.CalsVariables_from_h5(data_folder_fill +
+            '/fill_heatload_data_h5s/heatloads_fill_%d.h5'%filln))
     except Exception as err:
         print('Skipped! Got:')
         print(err)
@@ -330,13 +339,13 @@ ax11.set_ylabel('Energy [TeV]')
 time_conv.set_x_for_plot(fig, ax1)
 
 
-ms.comb_legend(ax1,ax11, bbox_to_anchor=(1.06, 1.05),  loc='upper left', prop={'size':fontsz_leg})
+ms.comb_legend(ax1,ax11, bbox_to_anchor=(1.1, 1.05),  loc='upper left', prop={'size':fontsz_leg})
 
 if normalization_to_length_of is None:
     ax2.set_ylabel('Heat load\n[W]')
 else:
     ax2.set_ylabel('Heat load\n[W/m]')
-ax2.legend(bbox_to_anchor=(1.06, 1.05),  loc='upper left', prop={'size':fontsz_leg})#, frameon=False)
+ax2.legend(bbox_to_anchor=(1.1, 1.05),  loc='upper left', prop={'size':fontsz_leg})#, frameon=False)
 #ax2.set_ylim(0, None)
 ax2.grid('on')
 
@@ -367,7 +376,7 @@ if time_in == 'd' or time_in == 'h':
     ax3.set_xlabel('Time [%s]' % time_in)
 
 pl.suptitle('From ' + tref_string)
-fig.subplots_adjust(left=.12, right=.82, hspace=.28, top=.89)
+fig.subplots_adjust(left=.1, right=.76, hspace=.28, top=.89)
 pl.savefig('plot.png', dpi=200)
 pl.show()
 
