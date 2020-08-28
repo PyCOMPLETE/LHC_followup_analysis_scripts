@@ -35,7 +35,7 @@ for df in data_folder_list:
         for kk in this_dict_fill_bmodes:
             this_dict_fill_bmodes[kk]['data_folder'] = df
         dict_fill_bmodes.update(this_dict_fill_bmodes)
-        
+
 # get location of current data
 data_folder_fill = dict_fill_bmodes[filln]['data_folder']
 
