@@ -3,7 +3,7 @@ import LHCMeasurementTools.LHC_Energy as Energy
 import LHCMeasurementTools.LHC_BSRT as BSRT
 import LHCMeasurementTools.TimberManager as tm
 import LHCMeasurementTools.mystyle as ms
-import BSRT_calib 
+import BSRT_calib
 import numpy as np
 import pylab as pl
 import pickle
@@ -105,9 +105,21 @@ if len(sys.argv)>1:
 
 fill_dict = {}
 if os.path.isdir(data_folder_fill+'/fill_basic_data_csvs'):
-    # 2016 structure
-    fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_basic_data_csvs/basic_data_fill_%d.csv'%filln, verbose=True))
-    fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_bunchbybunch_data_csvs/bunchbybunch_data_fill_%d.csv'%filln, verbose=True))
+    # 2016+ structure
+    fill_dict.update(tm.parse_timber_file(
+        data_folder_fill+'/fill_basic_data_csvs/basic_data_fill_%d.csv'%filln,
+        verbose=True))
+    fill_dict.update(tm.parse_timber_file(
+        (data_folder_fill +
+            '/fill_bunchbybunch_data_csvs/bunchbybunch_data_fill_%d.csv'%filln),
+        verbose=True))
+elif os.path.isdir(data_folder_fill+'/fill_basic_data_h5s'):
+    # 2016+ structure
+    fill_dict.update(tm.CalsVariables_from_h5(
+        data_folder_fill+'/fill_basic_data_h5s/basic_data_fill_%d.h5'%filln))
+    fill_dict.update(tm.CalsVariables_from_h5(
+        (data_folder_fill +
+            '/fill_bunchbybunch_data_h5s/bunchbybunch_data_fill_%d.h5'%filln)))
 else:
     # 2015 structure
     fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_csvs/fill_%d.csv'%filln, verbose=True))
