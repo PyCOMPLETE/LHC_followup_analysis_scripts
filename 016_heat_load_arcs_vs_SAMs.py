@@ -20,8 +20,6 @@ import HeatLoadCalculators.impedance_heatload as ihl
 import HeatLoadCalculators.synchrotron_radiation_heatload as srhl
 import HeatLoadCalculators.FillCalculator as fc
 
-import GasFlowHLCalculator.qbs_fill as qf
-from GasFlowHLCalculator.h5_storage import H5_storage
 
 from data_folders import data_folder_list, recalc_h5_folder
 
@@ -141,10 +139,28 @@ data_folder_fill = dict_fill_bmodes[filln]['data_folder']
 if os.path.isdir(data_folder_fill+'/fill_basic_data_csvs'):
     # 2016+ structure
     fill_dict = {}
-    fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_basic_data_csvs/basic_data_fill_%d.csv'%filln, verbose=True))
-    fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_bunchbybunch_data_csvs/bunchbybunch_data_fill_%d.csv'%filln, verbose=True))
+    fill_dict.update(tm.parse_timber_file(
+        data_folder_fill+'/fill_basic_data_csvs/basic_data_fill_%d.csv'%filln,
+        verbose=True))
+    fill_dict.update(tm.parse_timber_file(
+        data_folder_fill + ('/fill_bunchbybunch_data_csvs/'
+            'bunchbybunch_data_fill_%d.csv'%filln), verbose=True))
     if not use_recalculated:
-        fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_heatload_data_csvs/heatloads_fill_%d.csv'%filln, verbose=False))
+        fill_dict.update(tm.parse_timber_file(
+            data_folder_fill + ('/fill_heatload_data_csvs/'
+                'heatloads_fill_%d.csv'%filln), verbose=False))
+elif os.path.isdir(data_folder_fill+'/fill_basic_data_h5s'):
+    # 2016+ structure
+    fill_dict = {}
+    fill_dict.update(tm.CalsVariables_from_h5(
+        data_folder_fill+'/fill_basic_data_h5s/basic_data_fill_%d.h5'%filln))
+    fill_dict.update(tm.CalsVariables_from_h5(
+        data_folder_fill + ('/fill_bunchbybunch_data_h5s/'
+            'bunchbybunch_data_fill_%d.h5'%filln)))
+    if not use_recalculated:
+        fill_dict.update(tm.CalsVariables_from_h5(
+            data_folder_fill + ('/fill_heatload_data_h5s/'
+                'heatloads_fill_%d.h5'%filln)))
 else:
     raise ValueError('This mode has been discontinued!')
     # # 2015 structure
@@ -154,6 +170,8 @@ else:
 
 
 if use_recalculated:
+    import GasFlowHLCalculator.qbs_fill as qf
+    from GasFlowHLCalculator.h5_storage import H5_storage
     print('Using recalc data')
     # remove db values from dictionary (for 2015 cases)
     for kk in list(fill_dict.keys()):
