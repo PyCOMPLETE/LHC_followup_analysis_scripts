@@ -12,6 +12,7 @@ import LHCMeasurementTools.LHC_Heatloads as HL
 import LHCMeasurementTools.LHC_Energy as Energy
 from LHCMeasurementTools.SetOfHomogeneousVariables import SetOfHomogeneousNumericVariables
 from LHCMeasurementTools.LHC_Fills import Fills_Info
+from LHCMeasurementTools.LHC_Fill_LDB_Query import load_fill_dict_from_json
 import argparse
 import pickle
 from data_folders import data_folder_list, recalc_h5_folder
@@ -117,16 +118,14 @@ tref_string = time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime(t_ref_unix))
 time_conv = TH.TimeConverter(time_in, t_ref_unix, t_plot_tick_h=t_plot_tick_h)
 tc = time_conv.from_unix
 
-
-
-# merge pickles and add info on location
+# merge jsons and add info on location
 dict_fill_bmodes={}
 for df in data_folder_list:
-    with open(df+'/fills_and_bmodes.pkl', 'rb') as fid:
-        this_dict_fill_bmodes = pickle.load(fid)
-        for kk in this_dict_fill_bmodes:
-            this_dict_fill_bmodes[kk]['data_folder'] = df
-        dict_fill_bmodes.update(this_dict_fill_bmodes)
+    this_dict_fill_bmodes = load_fill_dict_from_json(
+            df+'/fills_and_bmodes.json')
+    for kk in this_dict_fill_bmodes:
+        this_dict_fill_bmodes[kk]['data_folder'] = df
+    dict_fill_bmodes.update(this_dict_fill_bmodes)
 
 fill_info = Fills_Info(dict_fill_bmodes)
 fill_list = fill_info.fills_in_time_window(t_start_unix, t_end_unix)
