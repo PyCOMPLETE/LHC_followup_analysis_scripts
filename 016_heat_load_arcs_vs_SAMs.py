@@ -1,5 +1,5 @@
 import sys, os
-import pickle
+import json
 import time
 import argparse
 
@@ -13,6 +13,7 @@ from LHCMeasurementTools.LHC_FBCT import FBCT
 from LHCMeasurementTools.LHC_BCT import BCT
 from LHCMeasurementTools.LHC_BQM import blength
 import LHCMeasurementTools.LHC_Heatloads as HL
+from LHCMeasurementTools.LHC_Fill_LDB_Query import load_fill_dict_from_json
 from LHCMeasurementTools.SetOfHomogeneousVariables import SetOfHomogeneousNumericVariables
 import LHCMeasurementTools.savefig as sf
 
@@ -121,14 +122,14 @@ if len(args.custom_vars)>0:
 
 
 
-# merge pickles and add info on location
+# merge jsons and add info on location
 dict_fill_bmodes={}
 for df in data_folder_list:
-    with open(df+'/fills_and_bmodes.pkl', 'rb') as fid:
-        this_dict_fill_bmodes = pickle.load(fid)
-        for kk in this_dict_fill_bmodes:
-            this_dict_fill_bmodes[kk]['data_folder'] = df
-        dict_fill_bmodes.update(this_dict_fill_bmodes)
+    this_dict_fill_bmodes = load_fill_dict_from_json(
+            df+'/fills_and_bmodes.json')
+    for kk in this_dict_fill_bmodes:
+        this_dict_fill_bmodes[kk]['data_folder'] = df
+    dict_fill_bmodes.update(this_dict_fill_bmodes)
 
 
 # get location of current data
