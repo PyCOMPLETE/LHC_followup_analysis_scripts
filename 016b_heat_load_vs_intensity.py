@@ -1,5 +1,5 @@
-
-import pickle as pickle
+import os
+import json
 import time
 import locale
 import pylab as pl
@@ -15,6 +15,7 @@ from LHCMeasurementTools.LHC_BCT import BCT
 from LHCMeasurementTools.LHC_BQM import blength
 import LHCMeasurementTools.LHC_Heatloads as HL
 from LHCMeasurementTools.SetOfHomogeneousVariables import SetOfHomogeneousNumericVariables
+from LHCMeasurementTools.LHC_Fill_LDB_Query import load_fill_dict_from_json
 
 import HeatLoadCalculators.impedance_heatload as ihl
 import HeatLoadCalculators.synchrotron_radiation_heatload as srhl
@@ -90,15 +91,14 @@ dict_hl_groups = {}
 dict_hl_groups['Arcs'] = HL.variable_lists_heatloads['AVG_ARC']
 
 colstr = {1: 'b', 2: 'r'}
-
+# merge jsons and add info on location
 dict_fill_bmodes={}
 for df in data_folder_list:
-    with open(df+'/fills_and_bmodes.pkl', 'rb') as fid:
-        this_dict_fill_bmodes = pickle.load(fid)
-        for kk in this_dict_fill_bmodes:
-            this_dict_fill_bmodes[kk]['data_folder'] = df
-        dict_fill_bmodes.update(this_dict_fill_bmodes)
-
+    this_dict_fill_bmodes = load_fill_dict_from_json(
+            df+'/fills_and_bmodes.json')
+    for kk in this_dict_fill_bmodes:
+        this_dict_fill_bmodes[kk]['data_folder'] = df
+    dict_fill_bmodes.update(this_dict_fill_bmodes)
 
 fig_vs_int = pl.figure(100, figsize=(9,6))
 fig_vs_int.patch.set_facecolor('w')
@@ -130,15 +130,35 @@ for i_fill, filln in enumerate(filln_list):
     data_folder_fill = dict_fill_bmodes[filln]['data_folder']
     fills_string += '_%d'%filln
     fill_dict = {}
-    fill_dict.update(tm.parse_timber_file(data_folder_fill + '/fill_basic_data_csvs/basic_data_fill_%d.csv'%filln, verbose=False))
-    fill_dict.update(tm.parse_timber_file(data_folder_fill + '/fill_bunchbybunch_data_csvs/bunchbybunch_data_fill_%d.csv'%filln, verbose=False))
-    if use_recalculated:
-        fill_dict.update(qf.get_fill_dict(filln))
-    else:
-        fill_dict.update(tm.parse_timber_file(data_folder_fill + '/fill_heatload_data_csvs/heatloads_fill_%d.csv'%filln, verbose=False))
+    if os.path.isdir(data_folder_fill+'/fill_basic_data_csvs'):
+        fill_dict.update(tm.parse_timber_file(data_folder_fill
+            + '/fill_basic_data_csvs/basic_data_fill_%d.csv'%filln,
+            verbose=False))
+        fill_dict.update(tm.parse_timber_file(data_folder_fill
+            + '/fill_bunchbybunch_data_csvs/bunchbybunch_data_fill_%d.csv'%filln,
+            verbose=False))
+        if use_recalculated:
+            fill_dict.update(qf.get_fill_dict(filln))
+        else:
+            fill_dict.update(tm.parse_timber_file(data_folder_fill
+                + '/fill_heatload_data_csvs/heatloads_fill_%d.csv'%filln,
+                verbose=False))
+    elif os.path.isdir(data_folder_fill+'/fill_basic_data_h5s'):
+        fill_dict.update(tm.CalsVariables_from_h5(data_folder_fill
+            + '/fill_basic_data_h5s/basic_data_fill_%d.h5'%filln,
+            ))
+        fill_dict.update(tm.CalsVariables_from_h5(data_folder_fill
+            + '/fill_bunchbybunch_data_h5s/bunchbybunch_data_fill_%d.h5'%filln,
+            ))
+        if use_recalculated:
+            fill_dict.update(qf.get_fill_dict(filln))
+        else:
+            fill_dict.update(tm.CalsVariables_from_h5(data_folder_fill
+                + '/fill_heatload_data_h5s/heatloads_fill_%d.h5'%filln,
+                ))
+
     for csv in added_csvs:
         fill_dict.update(tm.parse_timber_file(csv), verbose=True)
-
     energy = Energy.energy(fill_dict, beam=1)
 
     t_ref = dict_fill_bmodes[filln]['t_startfill']
