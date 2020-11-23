@@ -35,7 +35,7 @@ for df in data_folder_list:
         dict_fill_bmodes.update(this_dict_fill_bmodes)
 
 if len(sys.argv)>1:
-     print '--> Processing fill {:s}'.format(sys.argv[1])
+     print('--> Processing fill {:s}'.format(sys.argv[1]))
      filln = int(sys.argv[1])
      
 # get location of current data
@@ -52,8 +52,8 @@ N_traces_set = None
 
 if len(sys.argv)>1:
 
-    if np.any(map(lambda s: ('--n_traces'in s), sys.argv)):
-        i_arg = np.where(map(lambda s: ('--n_traces'in s), sys.argv))[0]
+    if np.any([('--n_traces'in s) for s in sys.argv]):
+        i_arg = np.where([('--n_traces'in s) for s in sys.argv])[0]
         arg_temp = sys.argv[i_arg]
         N_traces_set = float(arg_temp.split('=')[-1])
      
@@ -63,7 +63,7 @@ if len(sys.argv)>1:
         obsbox = False
         
     if '--injection' in sys.argv:
-        print 'Scans in the INJPHYS-PRERAMP beam modes'
+        print('Scans in the INJPHYS-PRERAMP beam modes')
         t_start_INJPHYS = dict_fill_bmodes[filln]['t_start_INJPHYS']
         t_start_RAMP = dict_fill_bmodes[filln]['t_start_RAMP']
         if N_traces_set==None: N_traces_set=30
@@ -71,21 +71,21 @@ if len(sys.argv)>1:
 
         
     if '--highenergy' in sys.argv:
-        print 'Scans in the FLATTOP-STABLE beam modes'
+        print('Scans in the FLATTOP-STABLE beam modes')
         t_start_FLATTOP = dict_fill_bmodes[filln]['t_start_FLATTOP']
         t_start_STABLE = dict_fill_bmodes[filln]['t_start_STABLE']
         if N_traces_set==None: N_traces_set=30
         list_scan_times = np.linspace((t_start_FLATTOP-t_ref)/3600., (t_start_STABLE-t_ref)/3600.+0.5, N_traces_set)
 
     if '--stablebeams' in sys.argv:
-        print 'Scans in the STABLE BEAMS'
+        print('Scans in the STABLE BEAMS')
         t_start_STABLE = dict_fill_bmodes[filln]['t_start_STABLE']
         t_end_STABLE = dict_fill_bmodes[filln]['t_stop_STABLE']
         if N_traces_set==None: N_traces_set=30
         list_scan_times = np.linspace((t_start_STABLE-t_ref)/3600., (t_end_STABLE-t_ref)/3600.+0.5, N_traces_set)
         
     if '--ramp' in sys.argv:
-        print 'Scans in the RAMP'
+        print('Scans in the RAMP')
         t_start_RAMP= dict_fill_bmodes[filln]['t_start_RAMP']
         t_end_RAMP = dict_fill_bmodes[filln]['t_stop_RAMP']
         if N_traces_set==None: N_traces_set=10
@@ -94,12 +94,12 @@ if len(sys.argv)>1:
     if '--sigma' in sys.argv:
         plot_emittance=False
         
-    if np.any(map(lambda s: ('--interval'in s), sys.argv)):
-         i_arg = np.where(map(lambda s: ('--interval'in s), sys.argv))[0]
+    if np.any([('--interval'in s) for s in sys.argv]):
+         i_arg = np.where([('--interval'in s) for s in sys.argv])[0]
          arg_temp = sys.argv[i_arg]
          t_start_man = float(arg_temp.split('=')[-1].split(',')[0])
          t_end_man = float(arg_temp.split('=')[-1].split(',')[1])
-         print 'Interval manually set: %.2fh to %.2fh'%(t_start_man, t_end_man)
+         print('Interval manually set: %.2fh to %.2fh'%(t_start_man, t_end_man))
          if N_traces_set==None: N_traces_set=30
          list_scan_times = np.linspace(t_start_man, t_end_man, N_traces_set)
          xlim = t_start_man, t_end_man
@@ -156,7 +156,7 @@ for beam in [1, 2]:
     N_scans = len(list_scan_times)
     sp_ploss = pl.subplot2grid((2,3), (beam-1, 1), rowspan=1, colspan=2,  sharex=sp_ploss)
     sp_ploss.set_title('Beam %d'%beam)
-    for ii in xrange(N_scans):
+    for ii in range(N_scans):
         colorcurr = hsv_to_rgb(float(ii)/float(N_scans), 0.9, 1.)
         
         t_curr = list_scan_times[ii]*3600. + t_ref

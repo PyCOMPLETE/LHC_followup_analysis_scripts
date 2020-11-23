@@ -87,8 +87,8 @@ try:
     import locale
     locale.setlocale(locale.LC_TIME, 'en_US')
 except Exception as err:
-    print '\nDid not manage to set locale. Got:'
-    print err
+    print('\nDid not manage to set locale. Got:')
+    print(err)
 
 
 
@@ -105,7 +105,7 @@ for strin in args.at:
         else:
             raise ValueError("Input not recognized\n"+strin)
 
-    if 't_offs_h' not in dd.keys():
+    if 't_offs_h' not in list(dd.keys()):
         dd['t_offs_h'] = None
 
     snapshots.append(dd)
@@ -125,7 +125,7 @@ for df in data_folder_list:
 
 N_snapshots = len(snapshots)
 
-for i_snapshot in xrange(N_snapshots):
+for i_snapshot in range(N_snapshots):
 
     filln = snapshots[i_snapshot]['filln']
     t_sample_h = snapshots[i_snapshot]['t_h']
@@ -179,7 +179,7 @@ for i_snapshot in xrange(N_snapshots):
         snapshots[i_snapshot]['t_offs_h_str'] = '%.2f'%snapshots[i_snapshot]['t_offs_h']
 
 # check consistency in cell naming
-for i_snapshot in xrange(N_snapshots):
+for i_snapshot in range(N_snapshots):
     for s in hl.sector_list():
         if len(snapshots[i_snapshot]['dict_hl_cell_by_cell'][s]['cell_names'])!=len(snapshots[0]['dict_hl_cell_by_cell'][s]['cell_names']):
             raise ValueError('Found inconsistency type 1 in dict!')
@@ -219,7 +219,7 @@ for i, s in enumerate(hl.sector_list()):
 
 
     y_list.append([])
-    for i_snapshot in xrange(N_snapshots):
+    for i_snapshot in range(N_snapshots):
 
         this_hld = snapshots[i_snapshot]['dict_hl_cell_by_cell'][s]
         cells = this_hld['cell_names']
@@ -308,18 +308,18 @@ for i, s in enumerate(hl.sector_list()):
         y_list[-1].append(tempy)
 
     to_table = []
-    to_table.append(['Fill'] + ['%d'%snapshots[i_snapshot]['filln'] for i_snapshot in xrange(N_snapshots)])
-    to_table.append(['Started on'] + [snapshots[i_snapshot]['tref_string_short'] for i_snapshot in xrange(N_snapshots)])
-    to_table.append(['T_sample [h]'] + ['%.2f'%snapshots[i_snapshot]['t_h'] for i_snapshot in xrange(N_snapshots)])
-    to_table.append(['Energy [GeV]'] + ['%.0f'%(snapshots[i_snapshot]['energy_GeV']) for i_snapshot in xrange(N_snapshots)])
-    to_table.append(['N_bunches (B1/B2)'] + ['%d/%d'%(snapshots[i_snapshot]['n_bunches_b1'],snapshots[i_snapshot]['n_bunches_b2']) for i_snapshot in xrange(N_snapshots)])
-    to_table.append(['Intensity (B1/B2) [p]'] + [('%.2e/%.2e'%(snapshots[i_snapshot]['intensity_b1'],snapshots[i_snapshot]['intensity_b2'])).replace('+', '') for i_snapshot in xrange(N_snapshots)])
-    to_table.append(['Bun.len. (B1/B2) [ns]'] + ['%.2f/%.2f'%(snapshots[i_snapshot]['bl_ave_b1']/1e-9,snapshots[i_snapshot]['bl_ave_b2']/1e-9) for i_snapshot in xrange(N_snapshots)])
-    to_table.append(['H.L. S%d (avg) [W]'%s] + ['%.2f' %(np.nanmean(snapshots[i_snapshot]['dict_hl_cell_by_cell'][s]['heat_loads'])) for i_snapshot in xrange(N_snapshots)])
-    to_table.append(['H.L. S%d (std) [W]'%s] + ['%.2f' %(np.nanstd(snapshots[i_snapshot]['dict_hl_cell_by_cell'][s]['heat_loads'])) for i_snapshot in xrange(N_snapshots)])
-    to_table.append(['H.L. exp. imped. [W]'] + ['%.2f' %(snapshots[i_snapshot]['hl_imped_sample']) for i_snapshot in xrange(N_snapshots)])
-    to_table.append(['H.L. exp. synrad [W]'] + ['%.2f' %( snapshots[i_snapshot]['hl_sr_sample']) for i_snapshot in xrange(N_snapshots)])
-    to_table.append(['T_nobeam [h]'] + [snapshots[i_snapshot]['t_offs_h_str'] for i_snapshot in xrange(N_snapshots)])
+    to_table.append(['Fill'] + ['%d'%snapshots[i_snapshot]['filln'] for i_snapshot in range(N_snapshots)])
+    to_table.append(['Started on'] + [snapshots[i_snapshot]['tref_string_short'] for i_snapshot in range(N_snapshots)])
+    to_table.append(['T_sample [h]'] + ['%.2f'%snapshots[i_snapshot]['t_h'] for i_snapshot in range(N_snapshots)])
+    to_table.append(['Energy [GeV]'] + ['%.0f'%(snapshots[i_snapshot]['energy_GeV']) for i_snapshot in range(N_snapshots)])
+    to_table.append(['N_bunches (B1/B2)'] + ['%d/%d'%(snapshots[i_snapshot]['n_bunches_b1'],snapshots[i_snapshot]['n_bunches_b2']) for i_snapshot in range(N_snapshots)])
+    to_table.append(['Intensity (B1/B2) [p]'] + [('%.2e/%.2e'%(snapshots[i_snapshot]['intensity_b1'],snapshots[i_snapshot]['intensity_b2'])).replace('+', '') for i_snapshot in range(N_snapshots)])
+    to_table.append(['Bun.len. (B1/B2) [ns]'] + ['%.2f/%.2f'%(snapshots[i_snapshot]['bl_ave_b1']/1e-9,snapshots[i_snapshot]['bl_ave_b2']/1e-9) for i_snapshot in range(N_snapshots)])
+    to_table.append(['H.L. S%d (avg) [W]'%s] + ['%.2f' %(np.nanmean(snapshots[i_snapshot]['dict_hl_cell_by_cell'][s]['heat_loads'])) for i_snapshot in range(N_snapshots)])
+    to_table.append(['H.L. S%d (std) [W]'%s] + ['%.2f' %(np.nanstd(snapshots[i_snapshot]['dict_hl_cell_by_cell'][s]['heat_loads'])) for i_snapshot in range(N_snapshots)])
+    to_table.append(['H.L. exp. imped. [W]'] + ['%.2f' %(snapshots[i_snapshot]['hl_imped_sample']) for i_snapshot in range(N_snapshots)])
+    to_table.append(['H.L. exp. synrad [W]'] + ['%.2f' %( snapshots[i_snapshot]['hl_sr_sample']) for i_snapshot in range(N_snapshots)])
+    to_table.append(['T_nobeam [h]'] + [snapshots[i_snapshot]['t_offs_h_str'] for i_snapshot in range(N_snapshots)])
 
 
     sptable.axis('tight')
@@ -377,17 +377,17 @@ axviol.set_xlim(1,19)
 
 
 to_table = []
-to_table.append(['Fill'] + ['%d'%snapshots[i_snapshot]['filln'] for i_snapshot in xrange(N_snapshots)])
-to_table.append(['Started on'] + [snapshots[i_snapshot]['tref_string_short'] for i_snapshot in xrange(N_snapshots)])
-to_table.append(['T_sample [h]'] + ['%.2f'%snapshots[i_snapshot]['t_h'] for i_snapshot in xrange(N_snapshots)])
-to_table.append(['Energy [GeV]'] + ['%.0f'%(snapshots[i_snapshot]['energy_GeV']) for i_snapshot in xrange(N_snapshots)])
-to_table.append(['N_bunches (B1/B2)'] + ['%d/%d'%(snapshots[i_snapshot]['n_bunches_b1'],snapshots[i_snapshot]['n_bunches_b2']) for i_snapshot in xrange(N_snapshots)])
-to_table.append(['Intensity (B1/B2) [p]'] + [('%.2e/%.2e'%(snapshots[i_snapshot]['intensity_b1'],snapshots[i_snapshot]['intensity_b2'])).replace('+', '') for i_snapshot in xrange(N_snapshots)])
-to_table.append(['Bun.len. (B1/B2) [ns]'] + ['%.2f/%.2f'%(snapshots[i_snapshot]['bl_ave_b1']/1e-9,snapshots[i_snapshot]['bl_ave_b2']/1e-9) for i_snapshot in xrange(N_snapshots)])
-to_table.append(['H.L. exp. imped. [W]'] + ['%.2f' %(snapshots[i_snapshot]['hl_imped_sample']) for i_snapshot in xrange(N_snapshots)])
-to_table.append(['H.L. exp. synrad [W]'] + ['%.2f' %( snapshots[i_snapshot]['hl_sr_sample']) for i_snapshot in xrange(N_snapshots)])
-to_table.append(['H.L. exp. imp.+SR [W/p+]'] + ['%.2e' %((snapshots[i_snapshot]['hl_imped_sample']+snapshots[i_snapshot]['hl_sr_sample'])/(snapshots[i_snapshot]['intensity_b1']+snapshots[i_snapshot]['intensity_b2'])) for i_snapshot in xrange(N_snapshots)])
-to_table.append(['T_nobeam [h]'] + [snapshots[i_snapshot]['t_offs_h_str'] for i_snapshot in xrange(N_snapshots)])
+to_table.append(['Fill'] + ['%d'%snapshots[i_snapshot]['filln'] for i_snapshot in range(N_snapshots)])
+to_table.append(['Started on'] + [snapshots[i_snapshot]['tref_string_short'] for i_snapshot in range(N_snapshots)])
+to_table.append(['T_sample [h]'] + ['%.2f'%snapshots[i_snapshot]['t_h'] for i_snapshot in range(N_snapshots)])
+to_table.append(['Energy [GeV]'] + ['%.0f'%(snapshots[i_snapshot]['energy_GeV']) for i_snapshot in range(N_snapshots)])
+to_table.append(['N_bunches (B1/B2)'] + ['%d/%d'%(snapshots[i_snapshot]['n_bunches_b1'],snapshots[i_snapshot]['n_bunches_b2']) for i_snapshot in range(N_snapshots)])
+to_table.append(['Intensity (B1/B2) [p]'] + [('%.2e/%.2e'%(snapshots[i_snapshot]['intensity_b1'],snapshots[i_snapshot]['intensity_b2'])).replace('+', '') for i_snapshot in range(N_snapshots)])
+to_table.append(['Bun.len. (B1/B2) [ns]'] + ['%.2f/%.2f'%(snapshots[i_snapshot]['bl_ave_b1']/1e-9,snapshots[i_snapshot]['bl_ave_b2']/1e-9) for i_snapshot in range(N_snapshots)])
+to_table.append(['H.L. exp. imped. [W]'] + ['%.2f' %(snapshots[i_snapshot]['hl_imped_sample']) for i_snapshot in range(N_snapshots)])
+to_table.append(['H.L. exp. synrad [W]'] + ['%.2f' %( snapshots[i_snapshot]['hl_sr_sample']) for i_snapshot in range(N_snapshots)])
+to_table.append(['H.L. exp. imp.+SR [W/p+]'] + ['%.2e' %((snapshots[i_snapshot]['hl_imped_sample']+snapshots[i_snapshot]['hl_sr_sample'])/(snapshots[i_snapshot]['intensity_b1']+snapshots[i_snapshot]['intensity_b2'])) for i_snapshot in range(N_snapshots)])
+to_table.append(['T_nobeam [h]'] + [snapshots[i_snapshot]['t_offs_h_str'] for i_snapshot in range(N_snapshots)])
 
 
 sptable  =  plt.subplot2grid((2,3), (1,0), colspan=3)
@@ -459,9 +459,9 @@ if args.o:
     for sector in hl.sector_list():
         fname = folname+'/cellbycell_%s_%s_sector%d.csv'%(str_file, tagfname, sector)
         with open(fname, 'w') as fid:
-            fid.write('cell'+''.join([',snapshot%d'%isnap for isnap in xrange(len(snapshots))])+'\n')
+            fid.write('cell'+''.join([',snapshot%d'%isnap for isnap in range(len(snapshots))])+'\n')
             for i_cell, cell in enumerate(snapshots[0]['dict_hl_cell_by_cell'][sector]['cell_names']):
-                fid.write(cell+''.join([',%.1e'%snapshots[isnap]['dict_hl_cell_by_cell'][sector]['heat_loads'][i_cell] for isnap in xrange(len(snapshots))])+'\n')
+                fid.write(cell+''.join([',%.1e'%snapshots[isnap]['dict_hl_cell_by_cell'][sector]['heat_loads'][i_cell] for isnap in range(len(snapshots))])+'\n')
 
     fname = folname+'/cellbycell_%s_%s_generalinfo.txt'%(str_file, tagfname)
     with open(fname, 'w') as fid:

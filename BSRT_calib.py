@@ -7,8 +7,8 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
     if filln is None:
         raise ValueError('A fill number must be provided to select calibration!')
     
-    print('rescale = %s'%rescale )
-    print('period = %s'%period )
+    print(('rescale = %s'%rescale ))
+    print(('period = %s'%period ))
 
     #The "rescaling" is applied for the period between the BSRT calibration fill and the fill where the calibration factors change in timber. 
     #if rescale: #sigma_new=(scale_new/scale_old)*sigma_old
@@ -16,7 +16,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
 
     if filln<5256:        
 
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
             e_dict[kk] = {450:{}, 6500:{}}
 
         # Beam 1:
@@ -66,7 +66,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
         
     elif filln>=5256 and filln<5405:
 
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
             e_dict[kk] = {450:{}, 6500:{}}
 
         # Beam 1:
@@ -164,7 +164,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
 
         
     elif filln>=5405 and filln < 5690: 
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
             e_dict[kk] = {450:{}, 6500:{}}
 
         # Beam 1:
@@ -243,7 +243,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
 
     elif (filln>5690 and filln < 6053): # or filln>6400:        
 
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
             e_dict[kk] = {450:{}, 6500:{}}
 
         ###Beam 1:
@@ -303,7 +303,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
         print('Using calibration A-2017')
 
     elif filln>=6054 and filln < 6309:
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
             e_dict[kk] = {450:{}, 6500:{}}
 
         ###Beam 1:
@@ -362,9 +362,9 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
         
         print('Using calibration B-2017')
 
-	
+    
     elif filln>=6309 and filln < 6420:
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
             e_dict[kk] = {450:{}, 6500:{}}
 
         ###Beam 1:
@@ -484,7 +484,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
         
     #     print('Using calibration D-2017: 2.5TeV Runs!!!')
     elif filln>=6420  and filln <6500:
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
             e_dict[kk] = {450:{}, 6500:{}}
 
         ###Beam 1:
@@ -603,82 +603,82 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
         #print('Using calibration 2018 A')
     elif filln>=6544  and filln <6698: # changed on 04/06/2018
     #elif filln >= 6544: # changed on Friday 27/04/2018
-	for kk in e_dict.keys():
-		e_dict[kk] = {450:{}, 6500:{}}
-        
-        e_dict['wrong_sigma_corr_units'] = True
-        
-        # Beam 1:    
-        e_dict['betaf_h'][450][1]       = 205.05
-        e_dict['betaf_h'][6500][1]      = 200.0
-                
-        e_dict['betaf_v'][450][1]       = 286.84
-        e_dict['betaf_v'][6500][1]      = 300.0
-                
-        e_dict['sigma_corr_h'][450][1]  = 425.2
-        e_dict['sigma_corr_h'][6500][1] = 197.610741088
-  
-        e_dict['sigma_corr_v'][450][1]  = 407.6
-        e_dict['sigma_corr_v'][6500][1] = 212.403212946
-                
-        e_dict['scale_h'][450][1]       = 25.35
-        e_dict['scale_h'][6500][1]      = 23.6943949343
-                
-        e_dict['scale_v'][450][1]       = 25.32
-        e_dict['scale_v'][6500][1]      = 24.7305300188
-                
-        e_dict['rescale_sigma_h'][450][1]  = 1.
-        e_dict['rescale_sigma_h'][6500][1] = 1.
-        e_dict['rescale_sigma_v'][450][1]  = 1.
-        e_dict['rescale_sigma_v'][6500][1] = 1.
-                
-        # Beam 2:
-        e_dict['betaf_h'][450][2]       = 196.71
-        e_dict['betaf_h'][6500][2]      = 195.9
-                
-        e_dict['betaf_v'][450][2]       = 358.23
-        e_dict['betaf_v'][6500][2]      = 359.9
-                
-        e_dict['sigma_corr_h'][450][2]  = 501.6
-        e_dict['sigma_corr_h'][6500][2] = 274.082028528
-                
-        e_dict['sigma_corr_v'][450][2]  = 618.5
-        e_dict['sigma_corr_v'][6500][2] = 249.872280702
-               
-        e_dict['scale_h'][450][2]       = 32.02
-        e_dict['scale_h'][6500][2]      = 29.7324070175
-                
-        e_dict['scale_v'][450][2]       = 31.52
-        e_dict['scale_v'][6500][2]      = 29.9482736842
-                
-        e_dict['rescale_sigma_h'][450][2]  = 1.
-        e_dict['rescale_sigma_h'][6500][2] = 1.
-        e_dict['rescale_sigma_v'][450][2]  = 1.
-        e_dict['rescale_sigma_v'][6500][2] = 1.
-            
-        # gamma
-        e_dict['gamma'][450] = 479.6
-        e_dict['gamma'][6500] = 6927.6
+        for kk in list(e_dict.keys()):
+            e_dict[kk] = {450:{}, 6500:{}}
+
+            e_dict['wrong_sigma_corr_units'] = True
+
+            # Beam 1:    
+            e_dict['betaf_h'][450][1]       = 205.05
+            e_dict['betaf_h'][6500][1]      = 200.0
+
+            e_dict['betaf_v'][450][1]       = 286.84
+            e_dict['betaf_v'][6500][1]      = 300.0
+
+            e_dict['sigma_corr_h'][450][1]  = 425.2
+            e_dict['sigma_corr_h'][6500][1] = 197.610741088
+
+            e_dict['sigma_corr_v'][450][1]  = 407.6
+            e_dict['sigma_corr_v'][6500][1] = 212.403212946
+
+            e_dict['scale_h'][450][1]       = 25.35
+            e_dict['scale_h'][6500][1]      = 23.6943949343
+
+            e_dict['scale_v'][450][1]       = 25.32
+            e_dict['scale_v'][6500][1]      = 24.7305300188
+
+            e_dict['rescale_sigma_h'][450][1]  = 1.
+            e_dict['rescale_sigma_h'][6500][1] = 1.
+            e_dict['rescale_sigma_v'][450][1]  = 1.
+            e_dict['rescale_sigma_v'][6500][1] = 1.
+
+            # Beam 2:
+            e_dict['betaf_h'][450][2]       = 196.71
+            e_dict['betaf_h'][6500][2]      = 195.9
+
+            e_dict['betaf_v'][450][2]       = 358.23
+            e_dict['betaf_v'][6500][2]      = 359.9
+
+            e_dict['sigma_corr_h'][450][2]  = 501.6
+            e_dict['sigma_corr_h'][6500][2] = 274.082028528
+
+            e_dict['sigma_corr_v'][450][2]  = 618.5
+            e_dict['sigma_corr_v'][6500][2] = 249.872280702
+
+            e_dict['scale_h'][450][2]       = 32.02
+            e_dict['scale_h'][6500][2]      = 29.7324070175
+
+            e_dict['scale_v'][450][2]       = 31.52
+            e_dict['scale_v'][6500][2]      = 29.9482736842
+
+            e_dict['rescale_sigma_h'][450][2]  = 1.
+            e_dict['rescale_sigma_h'][6500][2] = 1.
+            e_dict['rescale_sigma_v'][450][2]  = 1.
+            e_dict['rescale_sigma_v'][6500][2] = 1.
+
+            # gamma
+            e_dict['gamma'][450] = 479.6
+            e_dict['gamma'][6500] = 6927.6
 
 
-        print('Using calibration 2018-A')
+            print('Using calibration 2018-A')
 
     elif filln>=6699  and filln <=6749: # changed on 06/06/2018
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
                 e_dict[kk] = {450:{}, 6500:{}}
-        
+
         e_dict['wrong_sigma_corr_units'] = True
-        
+
         # Beam 1:   
         e_dict['betaf_h'][450][1]       = 205.05
         e_dict['betaf_h'][6500][1]      = 200.0
-               
+
         e_dict['betaf_v'][450][1]       = 286.84
         e_dict['betaf_v'][6500][1]      = 300.0
-               
+
         e_dict['sigma_corr_h'][450][1]  = 425.2
         e_dict['sigma_corr_h'][6500][1] = 197.3
- 
+
         e_dict['sigma_corr_v'][450][1]  = 407.6
         e_dict['sigma_corr_v'][6500][1] = 212.8
                
@@ -695,46 +695,46 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
         e_dict['rescale_sigma_h'][6500][1] = e_dict['scale_h'][6500][1]/23.7
         e_dict['rescale_sigma_v'][450][1] = e_dict['scale_v'][450][1]/ 25.32
         e_dict['rescale_sigma_v'][6500][1] = e_dict['scale_v'][6500][1]/24.78
-	'''
+        '''
         else:
             e_dict['rescale_sigma_h'][450][1] = 1.
             e_dict['rescale_sigma_h'][6500][1] = 1.
             e_dict['rescale_sigma_v'][450][1] = 1.
             e_dict['rescale_sigma_v'][6500][1] = 1.
-         '''      
+        '''
         # Beam 2:
         e_dict['betaf_h'][450][2]       = 193.6
         e_dict['betaf_h'][6500][2]      = 195.9
-               
+
         e_dict['betaf_v'][450][2]       = 343.3
         e_dict['betaf_v'][6500][2]      = 350.95
-               
+
         e_dict['sigma_corr_h'][450][2]  = 599.0
         e_dict['sigma_corr_h'][6500][2] = 365.56
-               
+
         e_dict['sigma_corr_v'][450][2]  = 718.0
         e_dict['sigma_corr_v'][6500][2] = 384.0
-              
+
         e_dict['scale_h'][450][2]       = 31.62
         e_dict['scale_h'][6500][2]      = 30.71
-               
+
         e_dict['scale_v'][450][2]       = 32.83
         e_dict['scale_v'][6500][2]      = 34.29
-               
+
         #if rescale: #sigma_new=(scale_new/scale_old)*sigma_old
         print('rescale B2 2018-B')
         e_dict['rescale_sigma_h'][450][2] = e_dict['scale_h'][450][2]/32.02
         e_dict['rescale_sigma_h'][6500][2] = e_dict['scale_h'][6500][2]/29.85
         e_dict['rescale_sigma_v'][450][2] = e_dict['scale_v'][450][2]/31.52
         e_dict['rescale_sigma_v'][6500][2] = e_dict['scale_v'][6500][2]/29.92
-	'''
+        '''
         else:
             e_dict['rescale_sigma_h'][450][2] = 1.
             e_dict['rescale_sigma_h'][6500][2] = 1.
             e_dict['rescale_sigma_v'][450][2] = 1.
             e_dict['rescale_sigma_v'][6500][2] = 1.
-	'''
-           
+        '''
+       
         # gamma
         e_dict['gamma'][450] = 479.6
         e_dict['gamma'][6500] = 6927.6
@@ -743,7 +743,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
         print('Using calibration 2018-B')
 
     elif filln>=6750 and filln <6913: # changed on 06/06/2018
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
                 e_dict[kk] = {450:{}, 6500:{}}
         e_dict['wrong_sigma_corr_units'] = True
         # Beam 1:   
@@ -802,7 +802,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
         print('Using calibration 2018-B')
 
     elif filln>=6913 and filln <=7030: # changed on 08/08/2018
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
                 e_dict[kk] = {450:{}, 6500:{}}
         e_dict['wrong_sigma_corr_units'] = True
         # Beam 1:   
@@ -832,30 +832,30 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
         e_dict['rescale_sigma_h'][6500][1] = e_dict['scale_h'][6500][1]/23.7
         e_dict['rescale_sigma_v'][450][1] = e_dict['scale_v'][450][1]/ 25.32
         e_dict['rescale_sigma_v'][6500][1] = e_dict['scale_v'][6500][1]/24.78
-	'''
+        '''
         else:
             e_dict['rescale_sigma_h'][450][1] = 1.
             e_dict['rescale_sigma_h'][6500][1] = 1.
             e_dict['rescale_sigma_v'][450][1] = 1.
             e_dict['rescale_sigma_v'][6500][1] = 1.
-         '''      
-               
+         '''
+
         # Beam 2:
         e_dict['betaf_h'][450][2]       = 193.6
         e_dict['betaf_h'][6500][2]      = 195.9
-               
+
         e_dict['betaf_v'][450][2]       = 343.3
         e_dict['betaf_v'][6500][2]      = 350.95
-               
+
         e_dict['sigma_corr_h'][450][2]  = 493.8
         e_dict['sigma_corr_h'][6500][2] = 309.9
-               
+
         e_dict['sigma_corr_v'][450][2]  = 551.0
         e_dict['sigma_corr_v'][6500][2] = 311.0
-              
+
         e_dict['scale_h'][450][2]       = 31.3028
         e_dict['scale_h'][6500][2]      = 28.3114
-               
+
         e_dict['scale_v'][450][2]       = 32.6934
         e_dict['scale_v'][6500][2]      = 31.9171              
         #if rescale: #sigma_new=(scale_new/scale_old)*sigma_old
@@ -864,14 +864,14 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
         e_dict['rescale_sigma_h'][6500][2] = e_dict['scale_h'][6500][2]/30.71
         e_dict['rescale_sigma_v'][450][2] = e_dict['scale_v'][450][2]/32.83
         e_dict['rescale_sigma_v'][6500][2] = e_dict['scale_v'][6500][2]/34.29
-	'''
+        '''
         else:
             e_dict['rescale_sigma_h'][450][2] = 1.
             e_dict['rescale_sigma_h'][6500][2] = 1.
             e_dict['rescale_sigma_v'][450][2] = 1.
             e_dict['rescale_sigma_v'][6500][2] = 1.
-	'''
-           
+        '''
+
         # gamma
         e_dict['gamma'][450] = 479.6
         e_dict['gamma'][6500] = 6927.6
@@ -881,25 +881,25 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
 
 
     elif filln>=7031 and filln <=7220 : # changed on 08/08/2018
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
                 e_dict[kk] = {450:{}, 6500:{}}
         e_dict['wrong_sigma_corr_units'] = True
         # Beam 1:   
         e_dict['betaf_h'][450][1]       = 204.2
         e_dict['betaf_h'][6500][1]      = 201.5
-               
+
         e_dict['betaf_v'][450][1]       = 292.4
         e_dict['betaf_v'][6500][1]      = 287.0
-               
+
         e_dict['sigma_corr_h'][450][1]  = 412.7
         e_dict['sigma_corr_h'][6500][1] = 232.6
- 
+
         e_dict['sigma_corr_v'][450][1]  = 444.8
         e_dict['sigma_corr_v'][6500][1] = 253.7
-               
+
         e_dict['scale_h'][450][1]       = 25.1048
         e_dict['scale_h'][6500][1]      = 25.1527
-               
+
         e_dict['scale_v'][450][1]       = 25.6796
         e_dict['scale_v'][6500][1]      = 26.2339
 
@@ -907,26 +907,26 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
         e_dict['rescale_sigma_h'][6500][1] = 1.
         e_dict['rescale_sigma_v'][450][1] = 1.
         e_dict['rescale_sigma_v'][6500][1] = 1.
-               
+
         # Beam 2:
         e_dict['betaf_h'][450][2]       = 193.6
         e_dict['betaf_h'][6500][2]      = 196.0
-               
+
         e_dict['betaf_v'][450][2]       = 343.3
         e_dict['betaf_v'][6500][2]      = 351.0
-               
+
         e_dict['sigma_corr_h'][450][2]  = 493.8
         e_dict['sigma_corr_h'][6500][2] = 309.9
-               
+
         e_dict['sigma_corr_v'][450][2]  = 551.0
         e_dict['sigma_corr_v'][6500][2] = 311.0
-              
+
         e_dict['scale_h'][450][2]       = 31.3028
         e_dict['scale_h'][6500][2]      = 28.3114
-               
+
         e_dict['scale_v'][450][2]       = 32.6934
         e_dict['scale_v'][6500][2]      = 31.9171
-               
+
         e_dict['rescale_sigma_h'][450][2] = 1.
         e_dict['rescale_sigma_h'][6500][2] = 1.
         e_dict['rescale_sigma_v'][450][2] = 1.
@@ -942,49 +942,49 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
     elif filln>=7221 and filln <=7333 : # changed on 21/11/2018
     #B2 untouched during recalibration:New calibration data could be retro-applied to correct better previous data
     #B1 new calibration cannot be applied to previous fills (wrt Fill 7220)
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
                 e_dict[kk] = {450:{}, 6500:{}}
         e_dict['wrong_sigma_corr_units'] = True
         # Beam 1:   
         e_dict['betaf_h'][450][1]       = 204.2
         e_dict['betaf_h'][6500][1]      = 201.5
-               
+
         e_dict['betaf_v'][450][1]       = 292.4
         e_dict['betaf_v'][6500][1]      = 287.0
-               
+
         e_dict['sigma_corr_h'][450][1]  = 432.0
         e_dict['sigma_corr_h'][6500][1] = 271.0
- 
+
         e_dict['sigma_corr_v'][450][1]  = 449.0
         e_dict['sigma_corr_v'][6500][1] = 313.0
-               
+
         e_dict['scale_h'][450][1]       = 24.837
         e_dict['scale_h'][6500][1]      = 24.53
 
         e_dict['scale_v'][450][1]       = 25.842
         e_dict['scale_v'][6500][1]      = 24.421
 
-	#The "rescaling" is applied for the period between the BSRT calibration fill and the fill where the calibration factors change in timber. 
+    #The "rescaling" is applied for the period between the BSRT calibration fill and the fill where the calibration factors change in timber. 
         #if rescale: #sigma_new=(scale_new/scale_old)*sigma_old
         #When applying the "rescaling" for a specific period of fills, take the LSF (e_dict['sigma_corr_']) and scale_new (e_dict['rescale_sigma_']) values after the fill for which the new calibration factors are applied in timber  
         e_dict['rescale_sigma_h'][450][1] = e_dict['scale_h'][450][1]/25.1048
         e_dict['rescale_sigma_h'][6500][1] = e_dict['scale_h'][6500][1]/25.1527
         e_dict['rescale_sigma_v'][450][1] = e_dict['scale_v'][450][1]/25.6796
         e_dict['rescale_sigma_v'][6500][1] = e_dict['scale_v'][6500][1]/26.2339
-            
+
         # Beam 2:
         e_dict['betaf_h'][450][2]       = 193.6
         e_dict['betaf_h'][6500][2]      = 196.0
-               
+
         e_dict['betaf_v'][450][2]       = 343.3
         e_dict['betaf_v'][6500][2]      = 351.0
-               
+
         e_dict['sigma_corr_h'][450][2]  = 496.0
         e_dict['sigma_corr_h'][6500][2] = 318.0
-               
+
         e_dict['sigma_corr_v'][450][2]  = 544.0
         e_dict['sigma_corr_v'][6500][2] = 321.0
-              
+
         e_dict['scale_h'][450][2]       = 30.694
         e_dict['scale_h'][6500][2]      = 29.86
 
@@ -1006,22 +1006,22 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
 
     #after fill7334 the lsf and scales changed
     elif filln>=7334 and filln <=7426 : # changed on 21/11/2018
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
                 e_dict[kk] = {450:{}, 6500:{}}
         e_dict['wrong_sigma_corr_units'] = True
         # Beam 1:   
         e_dict['betaf_h'][450][1]       = 204.2
         e_dict['betaf_h'][6500][1]      = 201.5
-               
+
         e_dict['betaf_v'][450][1]       = 292.4
         e_dict['betaf_v'][6500][1]      = 287.0
-               
+
         e_dict['sigma_corr_h'][450][1]  = 432.0
         e_dict['sigma_corr_h'][6500][1] = 271.0
- 
+
         e_dict['sigma_corr_v'][450][1]  = 449.0
         e_dict['sigma_corr_v'][6500][1] = 313.0
-               
+
         e_dict['scale_h'][450][1]       = 24.837
         e_dict['scale_h'][6500][1]      = 24.53
 
@@ -1032,26 +1032,26 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
         e_dict['rescale_sigma_h'][6500][1] = 1.
         e_dict['rescale_sigma_v'][450][1] = 1.
         e_dict['rescale_sigma_v'][6500][1] = 1.
-               
+
         # Beam 2:
         e_dict['betaf_h'][450][2]       = 193.6
         e_dict['betaf_h'][6500][2]      = 196.0
-               
+
         e_dict['betaf_v'][450][2]       = 343.3
         e_dict['betaf_v'][6500][2]      = 351.0
-               
+
         e_dict['sigma_corr_h'][450][2]  = 496.0
         e_dict['sigma_corr_h'][6500][2] = 318.0
-               
+
         e_dict['sigma_corr_v'][450][2]  = 544.0
         e_dict['sigma_corr_v'][6500][2] = 321.0
-              
+
         e_dict['scale_h'][450][2]       = 30.694
         e_dict['scale_h'][6500][2]      = 29.86
 
         e_dict['scale_v'][450][2]       = 32.02
         e_dict['scale_v'][6500][2]      = 31.73
-               
+
         e_dict['rescale_sigma_h'][450][2] = 1.
         e_dict['rescale_sigma_h'][6500][2] = 1.
         e_dict['rescale_sigma_v'][450][2] = 1.
@@ -1065,7 +1065,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
 
     elif filln>=7427: # (IE) - Ion period 2018 added on 21.11.2018
 
-        for kk in e_dict.keys():
+        for kk in list(e_dict.keys()):
                 e_dict[kk] = {450:{}, 6500:{}}
         e_dict['wrong_sigma_corr_units'] = True
         # Beam 1:   
@@ -1077,7 +1077,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
 
         e_dict['sigma_corr_h'][450][1]  = 432.0
         e_dict['sigma_corr_h'][6500][1] = 271.0
- 
+
         e_dict['sigma_corr_v'][450][1]  = 449.0
         e_dict['sigma_corr_v'][6500][1] = 313.0
 
@@ -1101,7 +1101,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
 
         e_dict['sigma_corr_h'][450][2]  = 496.0
         e_dict['sigma_corr_h'][6500][2] = 318.0
-               
+
         e_dict['sigma_corr_v'][450][2]  = 544.0
         e_dict['sigma_corr_v'][6500][2] = 321.0
 
@@ -1125,11 +1125,11 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
     else:
         raise ValueError('What?!')
 
-    if 'wrong_sigma_corr_units' in e_dict.keys():
+    if 'wrong_sigma_corr_units' in list(e_dict.keys()):
         if e_dict['wrong_sigma_corr_units']:
             for plane in ['h', 'v']:
                 for energy in [450, 6500]:
                     for beam in [1,2]:
                         e_dict['sigma_corr_'+plane][energy][beam] *= 1e-3
-    
+
     return(e_dict)

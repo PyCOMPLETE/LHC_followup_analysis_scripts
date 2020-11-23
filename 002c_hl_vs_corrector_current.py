@@ -68,28 +68,28 @@ t_sample = t_ref + t_sample_h*3600
 import pytimber
 ldb = pytimber.LoggingDB()
 dict_correctors = {}
-print 'Start download H correctors'
+print('Start download H correctors')
 namesh = ldb.search('%RCBH%I_MEAS')
 dict_correctors.update(ldb.getScaled(namesh, t_sample, t_sample+window_corrector_avg_s, scaleAlgorithm='AVG', 
                         scaleInterval='SECOND',scaleSize='%d'%window_corrector_avg_s))
-print 'Downloaded H correctors'
-print 'Start download V correctors'
+print('Downloaded H correctors')
+print('Start download V correctors')
 namesv = ldb.search('%RCBV%I_MEAS')
 dict_correctors.update(ldb.getScaled(namesv, t_sample, t_sample+window_corrector_avg_s, scaleAlgorithm='AVG',
                 scaleInterval='SECOND',scaleSize='%d'%window_corrector_avg_s))
-print 'Downloaded V correctors'
+print('Downloaded V correctors')
 
 #evaluate avg and simplify naming
 dict_avg = {}
 dict_plane = {}
-for kk in dict_correctors.keys():
+for kk in list(dict_correctors.keys()):
     beam_name = kk.split(':')[-2][-2:]
     loc = kk.split('.')[2][-2:]+kk.split('.')[1][-2:]
     plane = kk.split('RCB')[-1][0]
 
     simplified_name = loc+'_'+beam_name
     if '16L2' in kk:
-        print kk, simplified_name, plane
+        print(kk, simplified_name, plane)
 
     dict_avg[simplified_name] = np.mean(dict_correctors[kk][1])
     dict_plane[simplified_name] = plane
@@ -111,7 +111,7 @@ for i_s, s in enumerate(hl.sector_list()):
         place = name_quad.replace('Q', '')
         
         if place.startswith('10') or place.startswith('34'):
-            print 'Skipped %s!'%place
+            print('Skipped %s!'%place)
             list_corr_B1_B2.append('')
             list_current_B1.append(np.nan)
             list_current_B2.append(np.nan)

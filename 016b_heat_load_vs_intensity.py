@@ -1,5 +1,5 @@
-from __future__ import division
-import cPickle as pickle
+
+import pickle as pickle
 import time
 import locale
 import pylab as pl
@@ -63,7 +63,7 @@ else:
     title_string = 'Logged data'
 
 if t_zero:
-    print('Heat load offsets are subtracted at t_0=%.2f' % t_zero)
+    print(('Heat load offsets are subtracted at t_0=%.2f' % t_zero))
 else:
     print('Heat load offsets are not subtracted.')
 
@@ -165,7 +165,7 @@ for i_fill, filln in enumerate(filln_list):
         for fig_ in fig_vs_int, fig_blen_vs_int:
             fig_.suptitle(' Fill. %d started on %s\n%s %s (%s)'%(filln, tref_string, n_bunches_string, 'Arcs', title_string))
 
-    print(filln, 'Number of bunches:', n_bunches_bx)
+    print((filln, 'Number of bunches:', n_bunches_bx))
     if n_bunches_bx[1] != n_bunches_bx[2]:
         print('Not the same number of bunches! Choosing beam 1.')
     n_bunches = (n_bunches_bx[1]+n_bunches_bx[2])/2.
@@ -235,7 +235,7 @@ for i_fill, filln in enumerate(filln_list):
         table_bint = total_bint.nearest_older_sample(tt_blen)
 
     ii = 0
-    group_names = dict_hl_groups.keys()
+    group_names = list(dict_hl_groups.keys())
     group_name = group_names[ii]
     pl.suptitle(' Fill. %d started on %s\n%s (%s)'%(filln, tref_string, group_name, title_string))
     fig_h.canvas.set_window_title(group_name + ' %i' % filln)
