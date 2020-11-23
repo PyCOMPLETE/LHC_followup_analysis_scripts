@@ -230,11 +230,11 @@ for i_fill, filln in enumerate(filln_list):
     mask_bl_he_1 = t_bl_1>dict_fill_bmodes[filln]['t_stop_SQUEEZE']
 
     total_bint_0 = (bct_bx[1].interp(t_bl_1) + bct_bx[2].interp(t_bl_1))/ (2*n_bunches)
-    total_bint = tm.make_timber_variable_list(t_bl_1[mask_bl_he_1], total_bint_0[mask_bl_he_1])
+    total_bint = tm.CalsVariable(t_bl_1[mask_bl_he_1], total_bint_0[mask_bl_he_1])
     bl_1 = blength_bx[1].avblen
     bl_2 = np.interp(t_bl_1, blength_bx[2].t_stamps, blength_bx[2].avblen)
     av_blen = (bl_1 + bl_2)/(2*1e-9)
-    av_blen = tm.make_timber_variable_list(t_bl_1[mask_bl_he_1], av_blen[mask_bl_he_1])
+    av_blen = tm.CalsVariable(t_bl_1[mask_bl_he_1], av_blen[mask_bl_he_1])
 
     sp_blen_vs_int.plot(total_bint.values, av_blen.values, '.', lw=2., label=filln)
 

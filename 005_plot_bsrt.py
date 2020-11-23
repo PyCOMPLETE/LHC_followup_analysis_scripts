@@ -1,15 +1,21 @@
+import os
+import json
+import sys
+import time
+
+import numpy as np
+import pylab as pl
+from colorsys import hsv_to_rgb
+
 import LHCMeasurementTools.LHC_BCT as BCT
 import LHCMeasurementTools.LHC_Energy as Energy
 import LHCMeasurementTools.LHC_BSRT as BSRT
 import LHCMeasurementTools.TimberManager as tm
 import LHCMeasurementTools.mystyle as ms
+from LHCMeasurementTools.LHC_Fill_LDB_Query import load_fill_dict_from_json
 import BSRT_calib
-import numpy as np
-import pylab as pl
-import pickle
-import sys, time
-from colorsys import hsv_to_rgb
-import os
+
+from data_folders import data_folder_list, recalc_h5_folder
 
 # BSRT scan parameters
 filln = 5372
@@ -25,22 +31,17 @@ if len(sys.argv)>1:
      filln = int(sys.argv[1])
 
 
-
-# merge pickles and add info on location
-from data_folders import data_folder_list
+# merge jsons and add info on location
 dict_fill_bmodes={}
 for df in data_folder_list:
-    with open(df+'/fills_and_bmodes.pkl', 'rb') as fid:
-        this_dict_fill_bmodes = pickle.load(fid)
-        for kk in this_dict_fill_bmodes:
-            this_dict_fill_bmodes[kk]['data_folder'] = df
-        dict_fill_bmodes.update(this_dict_fill_bmodes)
+    this_dict_fill_bmodes = load_fill_dict_from_json(
+            df+'/fills_and_bmodes.json')
+    for kk in this_dict_fill_bmodes:
+        this_dict_fill_bmodes[kk]['data_folder'] = df
+    dict_fill_bmodes.update(this_dict_fill_bmodes)
 
 # get location of current data
 data_folder_fill = dict_fill_bmodes[filln]['data_folder']
-
-
-
 
 t_start_fill = dict_fill_bmodes[filln]['t_startfill']
 t_end_fill = dict_fill_bmodes[filln]['t_endfill']
