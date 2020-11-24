@@ -1,3 +1,4 @@
+import os, sys, time, string
 import LHCMeasurementTools.LHC_BQM as BQM
 import LHCMeasurementTools.TimestampHelpers as th
 import LHCMeasurementTools.TimberManager as tm
@@ -7,7 +8,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mlc
 import matplotlib.dates as mdt
-import pickle, sys, time, string
+from LHCMeasurementTools.LHC_Fill_LDB_Query import load_fill_dict_from_json
+
+from data_folders import data_folder_list, recalc_h5_folder
 
 plt.rcParams.update({'axes.labelsize': 18,
                      'axes.linewidth': 2,
@@ -25,10 +28,15 @@ bint_thresh = 8e9
 totint_thresh = 2e11
 color_scale_limits = (0.65, 1.0)
 
+# merge jsons and add info on location
+dict_fill_bmodes={}
+for df in data_folder_list:
+    this_dict_fill_bmodes = load_fill_dict_from_json(
+            df+'/fills_and_bmodes.json')
+    for kk in this_dict_fill_bmodes:
+        this_dict_fill_bmodes[kk]['data_folder'] = df
+    dict_fill_bmodes.update(this_dict_fill_bmodes)
 
-pkl_name = 'fills_and_bmodes.pkl'
-with open(pkl_name, 'rb') as fid:
-    dict_fill_bmodes = pickle.load(fid)
 
 
 if len(sys.argv)>1:
@@ -76,11 +84,23 @@ else:
     print('--> Processing latest fill: %d'%filln)
 
 
+# get location of current data
+data_folder_fill = dict_fill_bmodes[filln]['data_folder']
+
 t_ref = dict_fill_bmodes[filln]['t_startfill']
 tref_string = time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime(t_ref))
 
 fill_dict = {}
-fill_dict.update(tm.parse_timber_file('fill_bunchbybunch_data_csvs/bunchbybunch_data_fill_%d.csv'%filln, verbose=False))
+if os.path.isdir(data_folder_fill+'/fill_basic_data_csvs'):
+    fill_dict.update(tm.parse_timber_file(data_folder_fill
+        +'/fill_bunchbybunch_data_csvs/bunchbybunch_data_fill_%d.csv'%filln,
+        verbose=False))
+elif os.path.isdir(data_folder_fill+'/fill_basic_data_h5s'):
+    fill_dict.update(tm.CalsVariables_from_h5(data_folder_fill
+        +'/fill_bunchbybunch_data_h5s/bunchbybunch_data_fill_%d.h5'%filln,
+        ))
+else:
+    raise ValueError('What?!')
 
 
 i_fig = 0
