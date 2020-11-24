@@ -11,15 +11,17 @@ import matplotlib.dates as mdt
 import pickle, sys, time, string
 import os
 
-# merge pickles and add info on location
-from data_folders import data_folder_list
+from LHCMeasurementTools.LHC_Fill_LDB_Query import load_fill_dict_from_json
+from data_folders import data_folder_list, recalc_h5_folder
+
+# merge jsons and add info on location
 dict_fill_bmodes={}
 for df in data_folder_list:
-    with open(df+'/fills_and_bmodes.pkl', 'rb') as fid:
-        this_dict_fill_bmodes = pickle.load(fid)
-        for kk in this_dict_fill_bmodes:
-            this_dict_fill_bmodes[kk]['data_folder'] = df
-        dict_fill_bmodes.update(this_dict_fill_bmodes)
+    this_dict_fill_bmodes = load_fill_dict_from_json(
+            df+'/fills_and_bmodes.json')
+    for kk in this_dict_fill_bmodes:
+        this_dict_fill_bmodes[kk]['data_folder'] = df
+    dict_fill_bmodes.update(this_dict_fill_bmodes)
 
 if len(sys.argv)>1:
      print('--> Processing fill {:s}'.format(sys.argv[1]))
@@ -120,11 +122,22 @@ data_folder_fill = dict_fill_bmodes[filln]['data_folder']
 fill_dict = {}
 if os.path.isdir(data_folder_fill+'/fill_basic_data_csvs'):
     # 2016 structure
-    fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_basic_data_csvs/basic_data_fill_%d.csv'%filln, verbose=True))
-    fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_bunchbybunch_data_csvs/bunchbybunch_data_fill_%d.csv'%filln, verbose=True))
+    fill_dict.update(tm.parse_timber_file(data_folder_fill
+        +'/fill_basic_data_csvs/basic_data_fill_%d.csv'%filln,
+        verbose=True))
+    fill_dict.update(tm.parse_timber_file(data_folder_fill
+        +'/fill_bunchbybunch_data_csvs/bunchbybunch_data_fill_%d.csv'%filln
+        , verbose=True))
+elif os.path.isdir(data_folder_fill+'/fill_basic_data_h5s'):
+    fill_dict.update(tm.CalsVariables_from_h5(data_folder_fill
+        +'/fill_basic_data_h5s/basic_data_fill_%d.h5'%filln,
+        ))
+    fill_dict.update(tm.CalsVariables_from_h5(data_folder_fill
+        +'/fill_bunchbybunch_data_h5s/bunchbybunch_data_fill_%d.h5'%filln))
 else:
-    # 2015 structure
-    fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_csvs/fill_%d.csv'%filln, verbose=True))
+    raise ValueError('This mode is discontinous')
+    # # 2015 structure
+    # fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_csvs/fill_%d.csv'%filln, verbose=True))
 
 n_traces = len(traces_times)
 bint_thresh = 8e9
