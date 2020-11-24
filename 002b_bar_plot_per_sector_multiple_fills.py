@@ -1,6 +1,4 @@
 import sys, time, os
-sys.path.append("../")
-sys.path.append("../LHC_fullRun2_analysis_scripts/")
 import LHCMeasurementTools.TimberManager as tm
 import LHCMeasurementTools.SetOfHomogeneousVariables as shv
 import LHCMeasurementTools.LHC_Heatloads as hl
@@ -11,6 +9,7 @@ from data_folders import data_folder_list, recalc_h5_folder
 
 import GasFlowHLCalculator.qbs_fill as qf
 from GasFlowHLCalculator.h5_storage import H5_storage
+from LHCMeasurementTools.LHC_Fill_LDB_Query import load_fill_dict_from_json
 
 import cell_by_cell_plot_helpers as cch
 
@@ -112,15 +111,14 @@ for strin in args.at:
 
 
 
-# merge pickles and add info on location
+# merge jsons and add info on location
 dict_fill_bmodes={}
 for df in data_folder_list:
-    with open(df+'/fills_and_bmodes.pkl', 'rb') as fid:
-        this_dict_fill_bmodes = pickle.load(fid)
-        for kk in this_dict_fill_bmodes:
-            this_dict_fill_bmodes[kk]['data_folder'] = df
-        dict_fill_bmodes.update(this_dict_fill_bmodes)
-
+    this_dict_fill_bmodes = load_fill_dict_from_json(
+            df+'/fills_and_bmodes.json')
+    for kk in this_dict_fill_bmodes:
+        this_dict_fill_bmodes[kk]['data_folder'] = df
+    dict_fill_bmodes.update(this_dict_fill_bmodes)
 
 
 N_snapshots = len(snapshots)
@@ -149,11 +147,24 @@ for i_snapshot in range(N_snapshots):
     fill_dict = {}
     if os.path.isdir(data_folder_fill+'/fill_basic_data_csvs'):
         # 2016 structure
-        fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_basic_data_csvs/basic_data_fill_%d.csv'%filln, verbose=args.v))
-        fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_bunchbybunch_data_csvs/bunchbybunch_data_fill_%d.csv'%filln, verbose=args.v))
+        fill_dict.update(tm.parse_timber_file(data_folder_fill
+            +'/fill_basic_data_csvs/basic_data_fill_%d.csv'%filln,
+            verbose=args.v))
+        fill_dict.update(tm.parse_timber_file(data_folder_fill
+            +'/fill_bunchbybunch_data_csvs/bunchbybunch_data_fill_%d.csv'%filln,
+            verbose=args.v))
+    elif os.path.isdir(data_folder_fill+'/fill_basic_data_h5s'):
+        # 2016 structure
+        fill_dict.update(tm.CalsVariables_from_h5(data_folder_fill
+            +'/fill_basic_data_h5s/basic_data_fill_%d.h5'%filln,
+            ))
+        fill_dict.update(tm.CalsVariables_from_h5(data_folder_fill
+            +'/fill_bunchbybunch_data_h5s/bunchbybunch_data_fill_%d.h5'%filln,
+            ))
     else:
-        # 2015 structure
-        fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_csvs/fill_%d.csv'%filln, verbose=args.v))
+        raise ValueError('This mode is discontinued')
+        # # 2015 structure
+        # fill_dict.update(tm.parse_timber_file(data_folder_fill+'/fill_csvs/fill_%d.csv'%filln, verbose=args.v))
 
     #sample standard fill data at right moment
     intensity_b1, intensity_b2, bl_ave_b1, bl_ave_b2, n_bunches_b1, n_bunches_b2, energy_GeV, hl_imped_sample, hl_sr_sample = cch.extract_and_compute_extra_fill_data(fill_dict, t_ref, t_sample_h, thresh_bint=3e10)
@@ -285,7 +296,9 @@ for i, s in enumerate(hl.sector_list()):
         histval, binedges = np.histogram(hl_cells, bins=nbinhist, range=(minhist, maxhist))
 
         normhist = histval/(len(hl_cells)*np.mean(np.diff(binedges)))
-        axhist.bar(left=binedges[:-1], width=np.diff(binedges), height=normhist, alpha=0.5, color=colorlist[i_snapshot], edgecolor='none')
+        axhist.bar(x=binedges[:-1], width=np.diff(binedges), height=normhist,
+                alpha=0.5, color=colorlist[i_snapshot], edgecolor='none',
+                align='edge')
 
         if normtointen:
             axhist.set_xlabel('Norm. heat load [W/hc/p+]')
@@ -426,7 +439,7 @@ for i_sn in range(N_snapshots):
     # axpol.set_rlabel_position(-22.5)
 
     axpol.set_xticks(np.arange(0, 2*np.pi-0.1, np.pi/4))
-    axpol.set_xticklabels(['P%d'%ip for ip in [7, 6, 5, 4, 3, 2, 1, 8, 7]])
+    axpol.set_xticklabels(['P%d'%ip for ip in [7, 6, 5, 4, 3, 2, 1, 8]])
 
     # axpol.plot(thetapol, all_hl*0+90/2., color='darkseagreen', linestyle='--', lw=1.5)
     # axpol.plot(thetapol, all_hl*0+160/2., color='darkgreen', linestyle='--', lw=1.5)

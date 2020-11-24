@@ -21,7 +21,6 @@ import HeatLoadCalculators.impedance_heatload as ihl
 import HeatLoadCalculators.synchrotron_radiation_heatload as srhl
 import HeatLoadCalculators.FillCalculator as fc
 
-
 from data_folders import data_folder_list, recalc_h5_folder
 
 from blacklists import device_blacklist
