@@ -494,7 +494,7 @@ if args.o:
 
     import json
     fnamejson = folname+'/cellbycell_%s_%s.json'%(str_file, tagfname)
-    with open(fnamejson, 'wb') as fid:
+    with open(fnamejson, 'w') as fid:
         json.dump(snapshots, fid, default=default)
 
 
