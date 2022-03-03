@@ -167,7 +167,8 @@ for beam in [1, 2]:
 
         # Colormap and normalisations
         xx, yy = np.meshgrid((fbct_t - fbct_t[0])/3600., np.arange(fbct_v.shape[1]))
-        zz = np.ma.masked_array(fbct_norm, mask = fbct_norm==0)[1:]
+        # zz = np.ma.masked_array(fbct_norm, mask = fbct_norm==0)[1:]
+        zz = np.ma.masked_array(fbct_norm, mask = fbct_norm==0)
 
         # Filling scheme
         ms.mystyle()
@@ -178,7 +179,7 @@ for beam in [1, 2]:
 
         norm = mlc.Normalize(*color_scale_limits)
 
-        pl1 = ax1.pcolormesh(yy, xx, zz.T, cmap=cmap, edgecolors='face', norm=norm)
+        pl1 = ax1.pcolormesh(yy, xx, zz.T, cmap=cmap, edgecolors='face', norm=norm, shading="nearest")
         ax1.set_ylabel('Time after injection [h]')
         ax1.set_xlabel('25 ns slot')
         ax1.set_xlim((0, 3500))
