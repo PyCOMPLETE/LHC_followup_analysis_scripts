@@ -117,7 +117,7 @@ if os.path.isdir(data_folder_fill+'/fill_basic_data_csvs'):
         verbose=True))
 elif os.path.isdir(data_folder_fill+'/fill_basic_data_h5s'):
     fill_dict.update(tm.CalsVariables_from_h5(data_folder_fill
-        +'/fill_basic_data_h5/basic_data_fill_%d.h5'%filln,
+        +'/fill_basic_data_h5s/basic_data_fill_%d.h5'%filln,
         ))
 
 pl.close('all')
