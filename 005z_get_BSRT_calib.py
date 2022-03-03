@@ -14,8 +14,8 @@ for df in data_folder_list:
     dict_fill_bmodes.update(this_dict_fill_bmodes)
 
 import pytimber
-#ldb = pytimber.LoggingDB(source='nxcals')
-ldb = pytimber.LoggingDB(source='ldb')
+ldb = pytimber.LoggingDB(source='nxcals')
+#ldb = pytimber.LoggingDB(source='ldb')
 
 
 device_name = {1:'5R4', 2:'5L4'}
