@@ -31,7 +31,7 @@ tagfname = ''
 parser = argparse.ArgumentParser(epilog='Example: 002b_bar_plot_per_sector_multiple_fills.py --at filln:5108!t_h:2.5!t_offs_h:0.05 filln:5108!t_h:3.5!t_offs_h:0.05')
 parser.add_argument('-o', help='Save plots on disk.', action='store_true')
 parser.add_argument('--savein', help='Specify folder to save the output', default='cell_by_cell_plots')
-parser.add_argument('--fromcsv', help='Load heatloads from csvs. By default, use recalculated.', action='store_true')
+parser.add_argument('--from_published', help='Load heatloads from NXCals as published. By default, use recalculated.', action='store_true')
 parser.add_argument('--min-hl-scale', help='Minimum of plot.', type=float)
 parser.add_argument('--max-hl-scale', help='Maximum of plot.', type=float)
 parser.add_argument('--no-plot-model', help='Plot imp. SR contribution to heat loads.', action='store_true')
@@ -60,7 +60,7 @@ if args.tag:
 
 plot_model = not args.no_plot_model
 
-from_csv = args.fromcsv
+from_published = args.from_published
 normtointen = args.normtointensity
 
 
@@ -129,9 +129,9 @@ for i_snapshot in range(N_snapshots):
     t_sample_h = snapshots[i_snapshot]['t_h']
     t_offset_h = snapshots[i_snapshot]['t_offs_h']
 
-    if from_csv:
-        fill_file = 'fill_heatload_data_csvs/hl_all_cells_fill_%d.csv'%filln
-        hid = tm.parse_timber_file(fill_file, verbose=args.v)
+    if from_published:
+        fill_file = f"{data_folder_list[0]}/fill_cell_by_cell_heatload_data_h5s/cell_by_cell_heatloads_fill_{filln}.h5"
+        hid = tm.CalsVariables_from_h5(fill_file)
     else:
         hid = qf.get_fill_dict(filln, h5_storage=H5_storage(recalc_h5_folder))
 
@@ -341,7 +341,7 @@ for i, s in enumerate(hl.sector_list()):
     table.scale(1,1.5)
     table.auto_set_font_size(False)
     table.set_fontsize(myfontsz-1)
-    fig_sect.suptitle('Sector %d, %d cells, %s'%(s, len(cells), {False:'recalc. values', True:'DB values'}[from_csv]))
+    fig_sect.suptitle('Sector %d, %d cells, %s'%(s, len(cells), {False:'recalc. values', True:'Published values'}[from_published]))
     figlist.append(fig_sect)
 
 
@@ -411,7 +411,7 @@ table.scale(1,1.5)
 table.auto_set_font_size(False)
 table.set_fontsize(myfontsz-1)
 
-figviol.suptitle('%s'%({False:'recalc. values', True:'DB values'}[from_csv]))
+figviol.suptitle('%s'%({False:'recalc. values', True:'Published values'}[from_published]))
 
 
 # Polar plot
