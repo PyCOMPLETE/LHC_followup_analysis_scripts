@@ -321,6 +321,7 @@ for i_fill, filln in enumerate(fill_list):
         ax3.axvline(fds, c='grey', ls='dashed', lw=2, alpha=0.4)
         try:x_fn = fds[0] #in case we are using the date
         except IndexError: x_fn = fds
+        except TypeError: x_fn = fds
         ax1.annotate('%d'%filln, xy=(x_fn, 1.01), xycoords=trans,
                             horizontalalignment='left', verticalalignment='bottom',
                             rotation=67.5, color='grey', alpha=0.8)
