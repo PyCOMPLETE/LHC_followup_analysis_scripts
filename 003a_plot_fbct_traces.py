@@ -44,7 +44,7 @@ if len(sys.argv)>1:
      if np.any([('--n_traces'in s) for s in sys.argv]):
         i_arg = int(np.where([('--n_traces'in s) for s in sys.argv])[0])
         arg_temp = sys.argv[i_arg]
-        N_traces_set = float(arg_temp.split('=')[-1])
+        N_traces_set = int(arg_temp.split('=')[-1])
         traces_times = np.linspace(0.1, (t_end-t_ref)/3600., N_traces_set)
 
      if '--injection' in sys.argv:
@@ -185,10 +185,55 @@ for beam in [1,2]:
     fig1.suptitle('Fill %d: B%d, started on %s'%(filln, beam, tref_string), fontsize=20)
     i_fig += 1
 
+    #plot bunch by bunch losses
+    fig3 = plt.figure(i_fig, figsize=(14, 8))
+    fig3.patch.set_facecolor('w')
+    fig_list.append(fig3)
+    ax30 = plt.subplot(211, sharex=sp_t)
+    #sp_t = ax30
+    ax31 = plt.subplot(212)
+
     #find the filled slots
     mask_bunches = np.ma.masked_greater(fbct.bint, bint_thresh).mask
     list_nbunches = np.sum(mask_bunches, axis=0)
     i_bunches = np.where(list_nbunches > 0)[0]
+    i_bunches_sel = list(set(i_bunches) & set(i_bun_obs_list))
+
+    ax30.plot((bct.t_stamps-t_ref)/3600., bct.values, color=beam_col[beam-1], lw=2)
+    #fbct_old = np.zeros(len(list_nbunches))
+    for i in range(0, n_traces): #(0,1)
+        t_cut_h = traces_times[i]
+        t_curr = t_ref+t_cut_h*3600.
+        t_delta = 10./60. #10 minutes
+        fbct_curr, t_fbct_curr = fbct.nearest_older_sample(t_curr, flag_return_time=True)
+        fbct_old, t_fbct_curr = fbct.nearest_older_sample(t_curr-t_delta*3600, flag_return_time=True)
+        fbct_losses = np.zeros(len(list_nbunches))
+        for i_b in i_bunches:
+            if fbct_old[i_b] != 0.:
+                loss = (fbct_old[i_b]-fbct_curr[i_b])/(fbct_old[i_b]*t_delta)
+                fbct_losses[i_b] = loss
+        ax31.plot(fbct_losses, color=ms.colorprog(i, n_traces),
+                     label='%.2f h'%((t_fbct_curr-t_ref)/3600.))
+        ax30.axvline((t_fbct_curr-t_ref)/3600., lw=1.5, color=ms.colorprog(i, n_traces))
+        #fbct_old = fbct_curr
+        
+    ax31.set_xlabel('25 ns slot')
+    ax31.set_xlim(0, 3500)
+    ax31.set_ylabel('Loss rate [%/h]')
+    ax31.grid('on')
+    ax30.set_xlabel('Time [h]')
+    ax30.set_ylabel('Beam intensity [p]')
+    ax30.grid('on')
+    ax30.set_ylim(bottom=0)
+    plt.subplots_adjust(top=0.9, bottom=0.1, right=0.95,
+                        left=0.1, hspace=0.3, wspace=0.4)
+    fig3.suptitle('Fill %d: B%d, started on %s'%(filln, beam, tref_string), fontsize=20)
+    i_fig += 1
+
+    # #find the filled slots
+    # mask_bunches = np.ma.masked_greater(fbct.bint, bint_thresh).mask
+    # list_nbunches = np.sum(mask_bunches, axis=0)
+    # i_bunches = np.where(list_nbunches > 0)[0]
 
     N_bunches = len(i_bunches)
     figbbb = plt.figure(100+i_fig, figsize=(14, 10))
