@@ -22,11 +22,13 @@ plt.rcParams.update({'axes.labelsize': 18,
 format_datetime = mdt.DateFormatter('%m-%d %H:%M')
 
 ylim = False
+noroll = False
 cmap = 'jet_r'
 t_inter = 60. #seconds
 bint_thresh = 8e9
 totint_thresh = 2e11
 color_scale_limits = (0.65, 1.0)
+color_scale_limits = (0.3, 1.0)
 
 # merge jsons and add info on location
 dict_fill_bmodes={}
@@ -61,6 +63,8 @@ if len(sys.argv)>1:
         ylim = v_arg.split('=')[-1]
         ylim = list(map(float, ylim.split(',')))
 
+    if '--noroll' in sys.argv:
+        noroll = True
     # if '--injection' in sys.argv:
     #     print 'Scans in the INJPHYS-PRERAMP beam modes'
     #     t_start_INJPHYS = dict_fill_bmodes[filln]['t_start_INJPHYS']
@@ -111,7 +115,8 @@ for beam in [1, 2]:
     print('\nPreparing plot beam %d...' %beam)
 
     fbct = FBCT.FBCT(fill_dict, beam=beam)
-    fbct_t_all, fbct_v_all = fbct.uniform_time()
+    dt = np.diff(fbct.t_stamps)[0]
+    fbct_t_all, fbct_v_all = fbct.uniform_time(t_inter=dt)
     nslots = fbct_v_all.shape[1]
 
     # Remove time without beam
@@ -161,9 +166,10 @@ for beam in [1, 2]:
                 cnt += 1
             i_inj.append(cnt)
         # Roll to injections
-        for i in range(nslots):
-            # fbct_v[:,i] = np.roll(fbct_v[:,i], -i_inj[i])
-            fbct_norm[:,i] = np.roll(fbct_norm[:,i], -i_inj[i])
+        if not noroll:
+            for i in range(nslots):
+                # fbct_v[:,i] = np.roll(fbct_v[:,i], -i_inj[i])
+                fbct_norm[:,i] = np.roll(fbct_norm[:,i], -i_inj[i])
 
         # Colormap and normalisations
         xx, yy = np.meshgrid((fbct_t - fbct_t[0])/3600., np.arange(fbct_v.shape[1]))
@@ -199,7 +205,7 @@ for beam in [1, 2]:
         locator.borderpad = -4
 
         cbar = plt.gcf().colorbar(pl1, cax=axins1, format='%.2g', orientation='horizontal')
-        cbar.set_ticks(list(np.arange(0.5, 1.1, 0.05)))
+        cbar.set_ticks(list(np.arange(0.1, 1.1, 0.05)))
         cbar.ax.tick_params(labelsize=16)
         cbar.ax.get_xaxis().labelpad = -60 #-72
         cbar.ax.set_xlabel('Intensity normalized to intensity at injection', fontsize=16)
