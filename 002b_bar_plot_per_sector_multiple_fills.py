@@ -129,12 +129,6 @@ for i_snapshot in range(N_snapshots):
     t_sample_h = snapshots[i_snapshot]['t_h']
     t_offset_h = snapshots[i_snapshot]['t_offs_h']
 
-    if from_published:
-        fill_file = f"{data_folder_list[0]}/fill_cell_by_cell_heatload_data_h5s/cell_by_cell_heatloads_fill_{filln}.h5"
-        hid = tm.CalsVariables_from_h5(fill_file)
-    else:
-        hid = qf.get_fill_dict(filln, h5_storage=H5_storage(recalc_h5_folder))
-
     # get location of current data
     data_folder_fill = dict_fill_bmodes[filln]['data_folder']
     t_fill_st = dict_fill_bmodes[filln]['t_startfill']
@@ -142,6 +136,12 @@ for i_snapshot in range(N_snapshots):
     t_ref=t_fill_st
     tref_string=time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime(t_ref))
     tref_string_short=time.strftime("%d %b %Y %H:%M", time.localtime(t_ref))
+
+    if from_published:
+        fill_file = f"{data_folder_fill}/fill_cell_by_cell_heatload_data_h5s/cell_by_cell_heatloads_fill_{filln}.h5"
+        hid = tm.CalsVariables_from_h5(fill_file)
+    else:
+        hid = qf.get_fill_dict(filln, h5_storage=H5_storage(recalc_h5_folder))
 
     # extract standard fill data
     fill_dict = {}
@@ -498,5 +498,5 @@ if args.o:
         json.dump(snapshots, fid, default=default)
 
 
-plt.show()
+#plt.show()
 

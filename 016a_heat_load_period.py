@@ -34,8 +34,8 @@ device_blacklist = [
 
 
 # Specify plot settings
-ax_norm_hl_ylim = 4e-13 #None#1e-14
-int_cut_norm = 4e13
+ax_norm_hl_ylim = 7e-13 #None#1e-14
+int_cut_norm = 0.5e13
 # defaults, can be overriden by args:
 t_start_plot = '15-05-2017,08:00' ##
 t_end_plot = '17-05-2017,08:00' ##
