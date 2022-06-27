@@ -1063,7 +1063,7 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
 
         print('Using calibration 2018-D')
 
-    elif filln>=7427: # (IE) - Ion period 2018 added on 21.11.2018
+    elif filln>=7427 and filln < 7499: # (IE) - Ion period 2018 added on 21.11.2018
 
         for kk in list(e_dict.keys()):
                 e_dict[kk] = {450:{}, 6500:{}}
@@ -1122,14 +1122,30 @@ def emittance_dictionary(filln=None, rescale=False, period = None):
 
         print('Using calibration 2018-D for Ions')
 
+    elif filln >= 7499:
+
+        for kk in list(e_dict.keys()):
+                e_dict[kk] = {450:{}, 6800:{}}
+        e_dict['wrong_sigma_corr_units'] = True
+        e_dict.update({'betaf_h': {450: {1: 204.2, 2: 193.6}, 6800: {1: 189.5, 2: 200.0}},
+                       'betaf_v': {450: {1: 292.4, 2: 343.3}, 6800: {1: 291.1, 2: 361.0}},
+                       'gamma': {450: 479.6, 6800: 6927.6},
+                       'sigma_corr_h': {450: {1: 0.4127, 2: 0.4938}, 6800: {1: 0.2326, 2: 0.3099000000000001}},
+                       'sigma_corr_v': {450: {1: 0.44480000000000003, 2: 0.551}, 6800: {1: 0.2537, 2: 0.311}},
+                       'rescale_sigma_h': {450: {1: 1.0, 2: 1.0}, 6800: {1: 1.0, 2: 1.0}},
+                       'rescale_sigma_v': {450: {1: 1.0, 2: 1.0}, 6800: {1: 1.0, 2: 1.0}},
+                       'scale_h': {450: {}, 6800: {}}, 'scale_v': {450: {}, 6800: {}}})
+
     else:
         raise ValueError('What?!')
 
     if 'wrong_sigma_corr_units' in list(e_dict.keys()):
         if e_dict['wrong_sigma_corr_units']:
             for plane in ['h', 'v']:
-                for energy in [450, 6500]:
+                for energy in [450, 6500, 6800]:
                     for beam in [1,2]:
-                        e_dict['sigma_corr_'+plane][energy][beam] *= 1e-3
-
+                        try:
+                            e_dict['sigma_corr_'+plane][energy][beam] *= 1e-3
+                        except KeyError:
+                            pass
     return(e_dict)

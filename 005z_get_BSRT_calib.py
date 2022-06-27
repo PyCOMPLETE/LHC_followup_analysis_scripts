@@ -1,7 +1,7 @@
 from LHCMeasurementTools.LHC_Fill_LDB_Query import load_fill_dict_from_json
 from data_folders import data_folder_list, recalc_h5_folder
 
-filln = 6740
+filln = 7875
 #~ filln = 6055
 
 # merge jsons and add info on location
@@ -19,7 +19,7 @@ ldb = pytimber.LoggingDB(source='nxcals')
 
 
 device_name = {1:'5R4', 2:'5L4'}
-event = {450:'t_stop_INJPHYS', 6500:'t_start_STABLE'}
+event = {450:'t_stop_INJPHYS', 6500:'t_start_FLATTOP'}
 
 
 e_dict = {'betaf_h':{}, 'betaf_v':{}, 'gamma':{},

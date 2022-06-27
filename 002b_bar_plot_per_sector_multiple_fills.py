@@ -489,7 +489,10 @@ if args.o:
 
     def default(obj):
         if isinstance(obj, np.ndarray):
-            return obj.tolist()
+            if np.isscalar(obj):
+                return obj
+            else:
+                return obj.tolist()
         raise TypeError('Not serializable')
 
     import json

@@ -55,16 +55,19 @@ plotaveonly = False
 if len(sys.argv)>1:
 
     if np.any([('--n_traces'in s) for s in sys.argv]):
-       i_arg = np.where([('--n_traces'in s) for s in sys.argv])[0]
+       i_arg = np.where([('--n_traces'in s) for s in sys.argv])[0][0]
        arg_temp = sys.argv[i_arg]
-       n_traces = float(arg_temp.split('=')[-1])
+       n_traces = int(arg_temp.split('=')[-1])
 
        list_scan_times = np.linspace((t_start_fill-t_ref)/3600., (t_end_fill-t_ref)/3600., n_traces)
         
     if '--injection' in sys.argv:
                print('Scans in the INJPHYS-PRERAMP beam modes')
                t_start_INJPHYS = dict_fill_bmodes[filln]['t_start_INJPHYS']
-               t_start_RAMP = dict_fill_bmodes[filln]['t_start_RAMP']
+               try:
+                    t_start_RAMP = dict_fill_bmodes[filln]['t_start_RAMP']
+               except KeyError:
+                    t_start_RAMP = dict_fill_bmodes[filln]['t_stop_INJPHYS']
                list_scan_times = np.linspace((t_start_INJPHYS-t_ref)/3600., (t_start_RAMP-t_ref)/3600., n_traces)
 
 
